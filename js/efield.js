@@ -2,7 +2,7 @@
 /*
  * startPoints: User defined start points for each flux line
  */
-function fieldRenderer(drawingSurface_, charges_, startPoints_)
+function fieldRenderer(drawingSurface_)
 {
   /** Global variables within this field renderer. */
 
@@ -51,10 +51,10 @@ function fieldRenderer(drawingSurface_, charges_, startPoints_)
   // Program for drawing surfaces - Gaussian for now, eventually charged surfaces.
   var surfaceProgram;
 
-  charges                = charges_;
+  charges                = new Charges();
   drawingSurface         = drawingSurface_;
   gaussianSurfaces       = new Array();
-  startPoints            = startPoints_;
+  startPoints            = new Array();
   surfaceGeometryBuffers = new Array();
   surfaceIndicesBuffers  = new Array();
   surfaceNormalBuffers   = new Array();
@@ -62,6 +62,19 @@ function fieldRenderer(drawingSurface_, charges_, startPoints_)
   this.addGaussianSurface    = function(surface)
   {
     gaussianSurfaces.push(surface);
+    return this;
+  }
+
+  this.addStartPoint         = function(x_, y_, z_, sgn_)
+  {
+    startPoints.push(new Array(x_, y_, z_, sgn_));
+    return this;
+  }
+
+  this.addCharge             = function(charge_)
+  {
+    charges.addCharge(charge_);
+    return this;
   }
 
   this.createSurfaceProgram  = function(gl)

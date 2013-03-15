@@ -2,7 +2,7 @@
 <html>
   <head>
     <title>Visualizing an Electric Field With HTML5 and WebGL</title>
-    <link   type="text/css"        href="css/estyle.css" rel="stylesheet">
+    <link   type="text/css"        href="css/estyle.css" rel="stylesheet" />
     <script type="text/javascript" src="js/gl-matrix.js"></script>
     <script type="text/javascript" src="js/charges.js"></script>
     <script type="text/javascript" src="js/motionEventHandler.js"></script>
@@ -145,6 +145,148 @@
   </div>
   <script type="text/javascript">
     "use strict";
+
+    var drawingSurface;
+    var gaussianSurface;
+    var renderer;
+
+
+    function tryLog(string)
+    {
+      if(this.console)
+      {
+        console.log(string);
+      }
+    }
+
+    /*
+     * This function builds the charges creates the charges and places them in a
+     * charges object. Edit this to change the charge configuration modeled in this
+     * illustration.
+     */
+    function placeCharges(fieldRenderer)
+    {
+      var charge1;
+      var charge2;
+
+      // Each charge has a charge, then x, y, z coordinates.
+      // Each of these is a floating point number.
+      charge1 = new Charge(  1.0, -30.0,  0.0, 0.0);
+      charge2 = new Charge( -1.0,  30.0,  0.0, 0.0);
+
+      fieldRenderer.addCharge(charge1)
+                   .addCharge(charge2);
+
+      return fieldRenderer;
+    }
+
+    function placeMoreCharges(fieldRenderer)
+    {
+      var charge;
+
+      charge = new Charge(1.0, 0.0, 0.0, 0.0);
+
+      fieldRenderer.addCharge(charge);
+
+      return fieldRenderer;
+    }
+
+    /*
+     * This function builds the charges creates the charges and places them in a
+     * charges object. Edit this to change the charge configuration modeled in this
+     * illustration.
+     */
+    function placeStillMoreCharges(fieldRenderer)
+    {
+      var charge1;
+      var charge2;
+
+      // Each charge has a charge, then x, y, z coordinates.
+      // Each of these is a floating point number.
+      charge1 = new Charge(  2.0, -30.0,  0.0, 0.0);
+      charge2 = new Charge( -1.0,  30.0,  0.0, 0.0);
+
+      fieldRenderer.addCharge(charge1)
+                   .addCharge(charge2);
+
+      return fieldRenderer;
+    }
+
+
+    /*
+     * This sets the start points of flux or field lines that will be traced
+     * the generate the illustration. The result is a two dimensional array
+     * startPoints[n][4]. The first index is the number of the flux line, and the
+     * second index varies from 0-2 for the x, y, and z start coordinates of the
+     * field line. The [3] element of the second index is +1.0 or -1.0 indicating
+     * whether the fiux line is to be traced along, or in opposition to the
+     * electric field. Field lines starting near a negative charge will usually
+     * have this indicator as -1.0.
+     */
+    function placeStartPoints(fieldRenderer)
+    {
+      fieldRenderer.addStartPoint(-28.0,   0.0,   0.0,    1.0)
+                   .addStartPoint(-30.0,   2.0,   0.0,    1.0)
+                   .addStartPoint(-30.0,  -2.0,   0.0,    1.0)
+                   .addStartPoint(-29.0,   1.0,   1.4142, 1.0)
+                   .addStartPoint(-29.0,   1.0,  -1.4142, 1.0)
+                   .addStartPoint(-29.0,  -1.0,   1.4142, 1.0)
+                   .addStartPoint(-29.0,  -1.0,  -1.4142, 1.0)
+                   .addStartPoint(-31.0,   1.0,   1.4142, 1.0)
+                   .addStartPoint(-31.0,   1.0,  -1.4142, 1.0)
+                   .addStartPoint(-31.0,  -1.0,   1.4142, 1.0)
+                   .addStartPoint(-31.0,  -1.0,  -1.4142, 1.0)
+                   .addStartPoint(-31.31,  0.54,  1.4142, 1.0)
+                   .addStartPoint(-31.31,  0.54, -1.4142, 1.0)
+                   .addStartPoint(-31.31, -0.54,  1.4142, 1.0)
+                   .addStartPoint(-31.31, -0.54, -1.4142, 1.0);
+
+      return fieldRenderer;
+    }
+
+    function placeMoreStartPoints(fieldRenderer)
+    {
+      fieldRenderer.addStartPoint( 2.0,  0.0,  0.0,    1.0)
+                   .addStartPoint(-2.0,  0.0,  0.0,    1.0)
+                   .addStartPoint( 0.0,  2.0,  0.0,    1.0)
+                   .addStartPoint( 0.0, -2.0,  0.0,    1.0)
+                   .addStartPoint( 1.0,  1.0,  1.4142, 1.0)
+                   .addStartPoint( 1.0,  1.0, -1.4142, 1.0)
+                   .addStartPoint( 1.0, -1.0,  1.4142, 1.0)
+                   .addStartPoint( 1.0, -1.0, -1.4142, 1.0)
+                   .addStartPoint(-1.0,  1.0,  1.4142, 1.0)
+                   .addStartPoint(-1.0,  1.0, -1.4142, 1.0)
+                   .addStartPoint(-1.0, -1.0,  1.4142, 1.0)
+                   .addStartPoint(-1.0, -1.0, -1.4142, 1.0);
+
+      return fieldRenderer;
+    }
+
+    drawingSurface = document.getElementById('drawingSurface');
+    renderer       = new fieldRenderer(drawingSurface);
+    renderer       = placeCharges(renderer);
+    renderer       = placeStartPoints(renderer);
+
+    drawingSurface = document.getElementById('drawingSurfaceII');
+    renderer       = new fieldRenderer(drawingSurface);
+    renderer       = placeMoreCharges(renderer);
+    renderer       = placeMoreStartPoints(renderer);
+
+    drawingSurface = document.getElementById('drawingSurfaceIII');
+    renderer       = new fieldRenderer(drawingSurface);
+    renderer       = placeStillMoreCharges(renderer);
+    renderer       = placeStartPoints(renderer);
+
+    drawingSurface  = document.getElementById('drawingSurfaceIV');
+    renderer        = new fieldRenderer(drawingSurface);
+    renderer        = placeCharges(renderer);
+    renderer        = placeStartPoints(renderer);
+    gaussianSurface = new gaussianSphere(0.0, 0.0, 0.0, 45.0);
+    renderer        = renderer.addGaussianSurface(gaussianSurface);
+
+  </script>
+  <script type="text/javascript">
+    "use strict";
     var error;
     var txt;
     var canvasSupported = !!window.HTMLCanvasElement;
@@ -170,165 +312,7 @@
         error = document.getElementById("nowebgl");
         error.innerHTML=txt;
         error.style.display="block";
-        
     }
-    </script>
-
-    <script type="text/javascript">
-        "use strict";
-
-        var charges;
-        var drawingSurface;
-        var gaussianSurface;
-        var renderer;
-        var startPoints;
-
-
-        function tryLog(string)
-        {
-          if(this.console)
-          {
-            console.log(string);
-          }
-        }
-
-        /*
-         * This function builds the charges creates the charges and places them in a
-         * charges object. Edit this to change the charge configuration modeled in this
-         * illustration.
-         */
-        function placeCharges()
-        {
-          var charge1;
-          var charge2;
-          var charges;
-
-          // Each charge has a charge, then x, y, z coordinates.
-          // Each of these is a floating point number.
-          charge1 = new Charge(  1.0, -30.0,  0.0, 0.0);
-          charge2 = new Charge( -1.0,  30.0,  0.0, 0.0);
-
-          charges = new Charges(charge1, charge2);
-
-          return charges;
-        }
-
-        function placeMoreCharges()
-        {
-          var charge;
-          var charges;
-
-          charge = new Charge(1.0, 0.0, 0.0, 0.0);
-
-          charges = new Charges(charge);
-
-          return charges;
-        }
-
-        /*
-         * This function builds the charges creates the charges and places them in a
-         * charges object. Edit this to change the charge configuration modeled in this
-         * illustration.
-         */
-        function placeStillMoreCharges()
-        {
-          var charge1;
-          var charge2;
-          var charges;
-
-          // Each charge has a charge, then x, y, z coordinates.
-          // Each of these is a floating point number.
-          charge1 = new Charge(  2.0, -30.0,  0.0, 0.0);
-          charge2 = new Charge( -1.0,  30.0,  0.0, 0.0);
-
-          charges = new Charges(charge1, charge2);
-
-          return charges;
-        }
-
-
-        /*
-         * This sets the start points of flux or field lines that will be traced
-         * the generate the illustration. The result is a two dimensional array
-         * startPoints[n][4]. The first index is the number of the flux line, and the
-         * second index varies from 0-2 for the x, y, and z start coordinates of the
-         * field line. The [3] element of the second index is +1.0 or -1.0 indicating
-         * whether the fiux line is to be traced along, or in opposition to the
-         * electric field. Field lines starting near a negative charge will usually
-         * have this indicator as -1.0.
-         */
-        function placeStartPoints()
-        {
-          var startPoints = new Array();
-
-          startPoints.push(new Array(-28.0,   0.0,   0.0,    1.0));
-          startPoints.push(new Array(-30.0,   2.0,   0.0,    1.0));
-          startPoints.push(new Array(-30.0,  -2.0,   0.0,    1.0));
-          startPoints.push(new Array(-29.0,   1.0,   1.4142, 1.0));
-          startPoints.push(new Array(-29.0,   1.0,  -1.4142, 1.0));
-          startPoints.push(new Array(-29.0,  -1.0,   1.4142, 1.0));
-          startPoints.push(new Array(-29.0,  -1.0,  -1.4142, 1.0));
-          startPoints.push(new Array(-31.0,   1.0,   1.4142, 1.0));
-          startPoints.push(new Array(-31.0,   1.0,  -1.4142, 1.0));
-          startPoints.push(new Array(-31.0,  -1.0,   1.4142, 1.0));
-          startPoints.push(new Array(-31.0,  -1.0,  -1.4142, 1.0));
-          startPoints.push(new Array(-31.31,  0.54,  1.4142, 1.0));
-          startPoints.push(new Array(-31.31,  0.54, -1.4142, 1.0));
-          startPoints.push(new Array(-31.31, -0.54,  1.4142, 1.0));
-          startPoints.push(new Array(-31.31, -0.54, -1.4142, 1.0));
-
-          return startPoints;
-        }
-
-        function placeMoreStartPoints()
-        {
-          var startPoints = new Array();
-
-          startPoints.push(new Array(  2.0,  0.0,  0.0,    1.0));
-          startPoints.push(new Array( -2.0,  0.0,  0.0,    1.0));
-          startPoints.push(new Array(  0.0,  2.0,  0.0,    1.0));
-          startPoints.push(new Array(  0.0, -2.0,  0.0,    1.0));
-          startPoints.push(new Array(  1.0,  1.0,  1.4142, 1.0));
-          startPoints.push(new Array(  1.0,  1.0, -1.4142, 1.0));
-          startPoints.push(new Array(  1.0, -1.0,  1.4142, 1.0));
-          startPoints.push(new Array(  1.0, -1.0, -1.4142, 1.0));
-          startPoints.push(new Array( -1.0,  1.0,  1.4142, 1.0));
-          startPoints.push(new Array( -1.0,  1.0, -1.4142, 1.0));
-          startPoints.push(new Array( -1.0, -1.0,  1.4142, 1.0));
-          startPoints.push(new Array( -1.0, -1.0, -1.4142, 1.0));
-
-          return startPoints;
-        }
-
-        charges        = placeCharges();
-        drawingSurface = document.getElementById('drawingSurface');
-        startPoints    = placeStartPoints();
-
-        gaussianSurface = new gaussianSphere(0.0, 0.0, 0.0, 45.0);
-
-        renderer       = new fieldRenderer(drawingSurface, charges, startPoints);
-
-        charges        = placeMoreCharges();
-        drawingSurface = document.getElementById('drawingSurfaceII');
-        startPoints    = placeMoreStartPoints();
-
-        renderer       = new fieldRenderer(drawingSurface, charges, startPoints);
-
-        charges        = placeStillMoreCharges();
-        drawingSurface = document.getElementById('drawingSurfaceIII');
-        startPoints    = placeStartPoints();
-
-        renderer       = new fieldRenderer(drawingSurface, charges, startPoints);
-
-        charges        = placeCharges();
-        drawingSurface = document.getElementById('drawingSurfaceIV');
-        startPoints    = placeStartPoints();
-
-        gaussianSurface = new gaussianSphere(0.0, 0.0, 0.0, 45.0);
-
-        renderer       = new fieldRenderer(drawingSurface, charges, startPoints);
-        renderer.addGaussianSurface(gaussianSurface);
-
-        </script>
+  </script>
 </body>
 </html>
