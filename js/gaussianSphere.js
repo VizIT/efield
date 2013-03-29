@@ -12,68 +12,68 @@ function surfaceGeometry(n)
   var nvertices;
   var vertices;
 
-  this.nindices  = 0;
-  this.nvertices = 0;
+  nindices  = 0;
+  nvertices = 0;
 
-  this.nMax      = n;
+  nMax      = n;
   
-  this.vertices  = new Float32Array(n/2);
-  this.indices   = new Uint16Array(n);
-  this.normals   = new Float32Array(n/2);
+  vertices  = new Float32Array(n/2);
+  indices   = new Uint16Array(n);
+  normals   = new Float32Array(n/2);
 
   this.getNmax            = function()
   {
-    return this.nMax;
+    return nMax;
   }
 
   this.setNindices        = function(n)
   {
-    this.nindices = n;
+    nindices = n;
   }
 
   this.getNindices        = function()
   {
-    return this.nindices;
+    return nindices;
   }
 
   this.setNvertices       = function(n)
   {
-    this.nvertices = n;
+    nvertices = n;
   }
 
   this.getNvertices       = function()
   {
-    return this.nvertices;
+    return nvertices;
   }
 
   this.setVerticies = function(geometry)
   {
-    this.vertices = geometry;
+    vertices = geometry;
   }
 
   this.getVertices = function()
   {
-    return this.vertices;
+    return vertices;
   }
 
   this.setIndices  = function(indices)
   {
-    this.indices = indices;
+    indices = indices;
   }
 
   this.getIndices = function()
   {
-    return this.indices;
+    return indices;
   }
 
   this.setNormals = function(normals)
   {
-    this.normals = normals;
+   normals = normals;
   }
 
   this.getNormals = function()
   {
-    return this.normals;
+    return normals;
   }
 }
 
@@ -81,42 +81,46 @@ function surfaceGeometry(n)
  * Represent a Gaussian sphere. This is a Gaussian surface, it will be drawn but will
  * have no effect on the field. The sphere or radius r is sentered at (x, y, z).
  */
-function gaussianSphere(x, y, z, r)
+function gaussianSphere(x_, y_, z_, r_)
 {
-  var latitudeBands;
-  var longitudeBands;
   var nindices;
+  var nlatitude;
+  var nlongitude;
   var nvertices;
+  var radius;
+  var x0;
+  var y0;
+  var z0;
 
-  this.nindices  = 0;
-  this.nvertices = 0;
+  nindices  = 0;
+  nvertices = 0;
 
-  this.radius = r;
-  this.x      = x;
-  this.y      = y;
-  this.z      = z;
+  radius = r_;
+  x0     = x_;
+  y0     = y_;
+  z0     = z_;
 
-  this.latitudeBands  = 30;
-  this.longitudeBands = 30;
+  nlatitude  = 30;
+  nlongitude = 30;
 
   this.setNindices        = function(n)
   {
-    this.nindices = n;
+    nindices = n;
   }
 
   this.getNindices        = function()
   {
-    return this.nindices;
+    return nindices;
   }
 
   this.setNvertices       = function(n)
   {
-    this.nvertices = n;
+    nvertices = n;
   }
 
   this.getNvertices       = function()
   {
-    return this.nvertices;
+    return nvertices;
   }
 
   this.computeSurface = function(surfaceGeometry)
@@ -141,18 +145,18 @@ function gaussianSphere(x, y, z, r)
     var y;
     var z;
 
-    vertices = surfaceGeometry.getVertices(); //new Float32Array(3*(this.latitudeBands+1)*(this.longitudeBands+1));
-    normals  = surfaceGeometry.getNormals();  //new Float32Array(3*(this.latitudeBands+1)*(this.longitudeBands+1));
+    vertices = surfaceGeometry.getVertices(); //new Float32Array(3*(nlatitude+1)*(nlongitude+1));
+    normals  = surfaceGeometry.getNormals();  //new Float32Array(3*(nlatitude+1)*(nlongitude+1));
 
-    for (latNumber=0; latNumber <= this.latitudeBands; latNumber++)
+    for (latNumber=0; latNumber <= nlatitude; latNumber++)
     {
-      theta    = latNumber * Math.PI / this.latitudeBands;
+      theta    = latNumber * Math.PI / nlatitude;
       sinTheta = Math.sin(theta);
       cosTheta = Math.cos(theta);
 
-      for (longNumber=0; longNumber <= this.longitudeBands; longNumber++)
+      for (longNumber=0; longNumber <= nlongitude; longNumber++)
       {
-        phi    = longNumber * 2 * Math.PI / this.longitudeBands;
+        phi    = longNumber * 2 * Math.PI / nlongitude;
         sinPhi = Math.sin(phi);
         cosPhi = Math.cos(phi);
 
@@ -160,38 +164,38 @@ function gaussianSphere(x, y, z, r)
         y      = cosTheta;
         z      = sinPhi * sinTheta;
 
-        normals[this.nvertices]    = x;
-        vertices[this.nvertices++] = this.radius * x;
+        normals[nvertices]    = x;
+        vertices[nvertices++] = radius * x + x0;
 
-        normals[this.nvertices]    = y;
-        vertices[this.nvertices++] = this.radius * y;
+        normals[nvertices]    = y;
+        vertices[nvertices++] = radius * y + y0;
 
-        normals[this.nvertices]    = z;
-        vertices[this.nvertices++] = this.radius * z;
+        normals[nvertices]    = z;
+        vertices[nvertices++] = radius * z + z0;
       }
     }
-    surfaceGeometry.setNvertices(--this.nvertices);
+    surfaceGeometry.setNvertices(--nvertices);
 
-    indices = surfaceGeometry.getIndices(); //new Uint16Array(6*latitudeBands*longitudeBands);
+    indices = surfaceGeometry.getIndices(); //new Uint16Array(6*nlatitude*nlongitude);
 
-    for (latNumber=0; latNumber < this.latitudeBands; latNumber++)
+    for (latNumber=0; latNumber < nlatitude; latNumber++)
     {
-      for (longNumber=0; longNumber < this.longitudeBands; longNumber++)
+      for (longNumber=0; longNumber < nlongitude; longNumber++)
       {
-        first  = (latNumber * (this.longitudeBands + 1)) + longNumber;
-        second = first + this.longitudeBands + 1;
-        offset = 6*(latNumber*this.longitudeBands + longNumber);
+        first  = (latNumber * (nlongitude + 1)) + longNumber;
+        second = first + nlongitude + 1;
+        offset = 6*(latNumber*nlongitude + longNumber);
 
-        indices[this.nindices++]   = first;
-        indices[this.nindices++] = second;
-        indices[this.nindices++] = first + 1;
+        indices[nindices++] = first;
+        indices[nindices++] = second;
+        indices[nindices++] = first + 1;
 
-        indices[this.nindices++] = second;
-        indices[this.nindices++] = second + 1;
-        indices[this.nindices++] = first + 1;
+        indices[nindices++] = second;
+        indices[nindices++] = second + 1;
+        indices[nindices++] = first + 1;
       }
     }
-    surfaceGeometry.setNindices(--this.nindices);
+    surfaceGeometry.setNindices(--nindices);
   }
 }
 

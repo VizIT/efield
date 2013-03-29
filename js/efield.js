@@ -1,4 +1,3 @@
-"use strict";
 /*
  * startPoints: User defined start points for each flux line
  */
@@ -361,9 +360,12 @@ function fieldRenderer(drawingSurface_)
   this.setModelViewMatrix = function(modelViewMatrix_)
   {
     modelViewMatrix = modelViewMatrix_;
-    mat3.fromMat4(normalMatrix, modelViewMatrix);
-    mat3.invert(normalMatrix, normalMatrix);
-    mat3.transpose(normalMatrix, normalMatrix);
+    // This straight copy of the modelView matrix into the normalMatrix
+    // is only valid when we are restricted to translations and rotations.
+    // Scale can be handled by renormalizing - the introduction of shearing
+    // or non-uniform scaling would require the use of (M^-1)^T.
+    // See gl-matrix's mat3.normalFromMat4
+    normalMatrix    = extractRotationPart(modelViewMatrix, normalMatrix);
   }
 
   this.getModelViewMatrix = function()
@@ -373,7 +375,7 @@ function fieldRenderer(drawingSurface_)
 
   this.render = function()
   {
-    // Clear previous color and depth values - do this only in the first set of elements d
+    // Clear previous color and depth values - do this just before the first set of elements are drawn
     gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 
     this.drawCharges(gl,                    chargeImageProgram,    modelViewMatrix,

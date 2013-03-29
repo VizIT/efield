@@ -322,3 +322,18 @@
       M[14] = -h1*cpst + h2*sp + h3*cpct;
       // M[15] = M[15];
   }
+
+  /*
+   * Extract the upper 3x3 rectangular rotation matrix from a 4x4 homogeneous
+   * transformation matrix. Both mat4 and mat3 are expected to be column major
+   * Float32 arrays as used to represent WebGL matrices.
+   */
+ function extractRotationPart(mat4, mat3)
+ {
+     // The first three elements of the mat3 are the same as the mat4
+     mat3.set(mat4.subarray(0,3));
+     mat3.set(mat4.subarray(4,7),  3);
+     mat3.set(mat4.subarray(8,11), 6);
+
+     return mat3;
+ }
