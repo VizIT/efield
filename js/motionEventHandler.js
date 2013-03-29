@@ -220,8 +220,8 @@ function motionEventHandler(target_)
   this.handleMouseDown = function(event)
   {
     inprogress = true;
-    lastX           = event.clientX;
-    lastY           = event.clientY;
+    lastX      = event.clientX;
+    lastY      = event.clientY;
   }
 
   this.handleMouseUp  = function(event)

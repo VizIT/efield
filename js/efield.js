@@ -1,8 +1,7 @@
-"use strict";
 /*
  * startPoints: User defined start points for each flux line
  */
-function fieldRenderer(drawingSurface_, charges_, startPoints_)
+function fieldRenderer(drawingSurface_)
 {
   /** Global variables within this field renderer. */
 
@@ -51,10 +50,10 @@ function fieldRenderer(drawingSurface_, charges_, startPoints_)
   // Program for drawing surfaces - Gaussian for now, eventually charged surfaces.
   var surfaceProgram;
 
-  charges                = charges_;
+  charges                = new Charges();
   drawingSurface         = drawingSurface_;
   gaussianSurfaces       = new Array();
-  startPoints            = startPoints_;
+  startPoints            = new Array();
   surfaceGeometryBuffers = new Array();
   surfaceIndicesBuffers  = new Array();
   surfaceNormalBuffers   = new Array();
@@ -62,6 +61,19 @@ function fieldRenderer(drawingSurface_, charges_, startPoints_)
   this.addGaussianSurface    = function(surface)
   {
     gaussianSurfaces.push(surface);
+    return this;
+  }
+
+  this.addStartPoint         = function(x_, y_, z_, sgn_)
+  {
+    startPoints.push(new Array(x_, y_, z_, sgn_));
+    return this;
+  }
+
+  this.addCharge             = function(charge_)
+  {
+    charges.addCharge(charge_);
+    return this;
   }
 
   this.createSurfaceProgram  = function(gl)
@@ -348,9 +360,12 @@ function fieldRenderer(drawingSurface_, charges_, startPoints_)
   this.setModelViewMatrix = function(modelViewMatrix_)
   {
     modelViewMatrix = modelViewMatrix_;
-    mat3.fromMat4(normalMatrix, modelViewMatrix);
-    mat3.invert(normalMatrix, normalMatrix);
-    mat3.transpose(normalMatrix, normalMatrix);
+    // This straight copy of the modelView matrix into the normalMatrix
+    // is only valid when we are restricted to translations and rotations.
+    // Scale can be handled by renormalizing - the introduction of shearing
+    // or non-uniform scaling would require the use of (M^-1)^T.
+    // See gl-matrix's mat3.normalFromMat4
+    normalMatrix    = extractRotationPart(modelViewMatrix, normalMatrix);
   }
 
   this.getModelViewMatrix = function()
@@ -360,7 +375,7 @@ function fieldRenderer(drawingSurface_, charges_, startPoints_)
 
   this.render = function()
   {
-    // Clear previous color and depth values - do this only in the first set of elements d
+    // Clear previous color and depth values - do this just before the first set of elements are drawn
     gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 
     this.drawCharges(gl,                    chargeImageProgram,    modelViewMatrix,

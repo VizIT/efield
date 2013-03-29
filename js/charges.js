@@ -1,4 +1,3 @@
-"use strict";
 // Represents a single charge in a set of charges
 // A charge has position and a charge in nano-Columbs.
 function Charge(Q_, x_, y_, z_)
@@ -107,47 +106,6 @@ function Charges()
         field[2]      += currentField[2];
       }
       return field;
-    }
-    
-    /*
-     * Trace a field line starting at the given x, y, z coordinates.
-     * Each step of length ds has components (Ex/E*ds, Ey/E*ds, Ez/E*ds).
-     * Steps is usually a Float32Array of size 3*maxPoints + 1. The 0th
-     * element of steps will be populated with the number of steps taken
-     * tracing the field line.
-     */
-    this.traceFluxLine = function(x, y, z, sign, ds, points, maxPoints)
-    {
-        var f;
-        var field;
-        var i;
-        // Offset into points arraw where we are writing the curent point.
-        // Advances by 3 for every point.
-        var offset;
-
-        for(i=0; i<maxPoints; i++)
-        {
-            offset           = 3*i + 1;
-            points[offset]   = x;
-            points[offset+1] = y;
-            points[offset+2] = z;
-            field            = this.getField(x, y, z);
-            f                = Math.sqrt(field[0] * field[0] + field[1] * field[1] + field[2] * field[2]);
-
-            if (f == 0)
-            {
-                // No field here - no possible flux line
-                break;
-            }
-            x += sign * field[0]/f * ds;
-            y += sign * field[1]/f * ds;
-            z += sign * field[2]/f * ds;
-        }
-
-        // The number of points populating this array.
-        points[0] = i;
-
-        return points;
     }
 }
 
@@ -290,55 +248,6 @@ function fluxLine(charges_)
     this.getStartZ       = function()
     {
         return startZ;
-    }
-
-    /*
-     * Generate two lines as an arrow head along the field line indicating the
-     * direction of the electric field.
-     */
-    this.drawArrowOld          = function(x0, y0, z0, sign, field, f, arrowSize, narrows)
-    {
-        var exnorm;
-        var eynorm;
-        var eznorm;
-        var offset;
-        var x1;
-        var y1;
-        var z1;
-        var x2;
-        var y2;
-        var z2;
-
-        exnorm = field[0]/f;
-        eynorm = field[1]/f;
-        eznorm = field[2]/f;
-
-        asx    = sign*arrowSize*exnorm;
-        asy    = sign*arrowSize*eynorm;
-        asz    = sign*arrowSize*eznorm;
-
-        x1     = x0 - asx - 0.5*asy;
-        y1     = y0 - asy + 0.5*asx;
-        z1     = z0 - asz;
-
-        x2     = x0 - asx + 0.5*asy;
-        y2     = y0 - asy - 0.5*asx;
-        z2     = z0 - asz;
-
-        offset            = narrows*12;
-
-        arrows[offset]    = x1;
-        arrows[offset+1]  = y1;
-        arrows[offset+2]  = z1;
-        arrows[offset+3]  = x0;
-        arrows[offset+4]  = y0;
-        arrows[offset+5]  = z0;
-        arrows[offset+6]  = x0;
-        arrows[offset+7]  = y0;
-        arrows[offset+8]  = z0;
-        arrows[offset+9]  = x2;
-        arrows[offset+10] = y2;
-        arrows[offset+11] = z2;
     }
 
     /*

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Visualizing an Electric Field With HTML5 and WebGL, Part 2: Gaussian Surfaces</title>
+    <link   rel="prev"             href="gaussianSurfaces.html" />
+    <link   type="text/css"        href="css/estyle.css" rel="stylesheet" />
+    <script type="text/javascript" src="js/charges.js"></script>
+    <script type="text/javascript" src="js/motionEventHandler.js"></script>
+    <script type="text/javascript" src="js/WebGL.js"></script>
+    <script type="text/javascript" src="js/gaussianSphere.js"></script>
+    <script type="text/javascript" src="js/efield.js"></script>
+    <script type="text/javascript"
+            src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+  </head>
+  <body>
+<!-- Copyright 2013 VizIT Solutions
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+  <div id="left">
+    <div id="topLeft">
+      <div id="topLeftContent">
+        Visualization<br>
+        Instruction<br>
+        Technology<br>
+      </div>
+    </div>
+    <div id="lowerLeft">
+      Education
+    </div>
+  </div>
+  <div id="right">
+    <div id="top">
+      <a href = "http://www.vizitsolutions.com/"><img id="logo" src="../../VizITLogo.png" alt="VizIT Solutions"></a>
+    </div>
+    <div id="main">
+    <div class="content">
+      <h1>Visualizing an Electric Field With HTML5 and WebGL, Part 3: Code Examples</h1>
+      <p id="nowebgl" class="error"><p>
+      <p class="abstract">
+        &nbsp;This library provides an easy to use method for generating physically correct
+        and instructionally relevant visualizations in electrostatics.
+      </p>
+
+      <h3>A First Diagram</h3>
+      <p>
+        This example generates a visualization of the electric field for a point
+       charge. It is as simple as placing the charge, and saying where to put the
+       field lines<sup>1</sup>.
+      </p>
+
+      <h4>The efield Package</h4>
+      <p>
+        The package is divided into a set of modules, each with a specific purpose.
+       Include the efield modules in the header of your HTML file.
+      </p>
+
+<pre>
+    &lt;script type="text/javascript" src="charges.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="motionEventHandler.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="WebGL.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="gaussianSphere.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="efield.js"&gt;&lt;/script&gt;
+</pre>
+
+
+      <figure class="right">
+        <!--A blank area we can draw on with JavaScript. -->
+        <canvas id="drawingSurface" width="300px" height="300px"></canvas>
+        <figcaption>How do we draw a charge at the origin?</figcaption>
+      </figure>
+
+      <h4>The Canvas</h4>
+      <p>
+        A critical step in any OpenGL program is to allocate a drawing surface.
+        This is the screen real estate where OpenGL will draw.  With WebGL, and
+        hence with the efield renderer, the drawing surface is an HTML5 canvas.
+        The location, size, and style of the canvas can be fully controlled through
+        CSS and JavaScript as any other HTML element. This simplifies incorporating
+        efield visualizations into existing content.
+      </p>
+<pre>
+    &lt;!--A blank area we can draw on with JavaScript. --&gt;
+    &lt;canvas id="drawingSurface" width="300px" height="300px"&gt;&lt;/canvas&gt;
+</pre>
+      <h4>The Charge</h4>
+      <p>
+        The Charge class represents a point charge Q at position (x,y,z).
+       Placing charge definitions in a separate routine, while not required,
+       yields cleaner, better organized code. This example generates a point
+       charge at the origin (0,0,0), and registers it with the renderer.
+      </p>
+<pre>
+    function placeCharges(fieldRenderer)
+    {
+      var charge;
+
+      charge = new Charge(1.0, 0.0, 0.0, 0.0);
+
+      fieldRenderer.addCharge(charge);
+
+      return fieldRenderer;
+    }
+</pre>
+
+      <h4>Field Lines</h4>
+      <p>
+        Field lines are specified by providing x,y,z, and sgn. (x,y,z) are
+       the coordinates of a point on the line, and sgn is an indicator
+       whether the field line should be traced in the direction
+       of the field line, or in the opposite direction. A value of 1.0
+       indicates that the field line traces along the field line, while
+       -1.0 indicates that the field line is traced in the opposite direction.
+       Use this latter option when tracing a field line starting near
+       a negative charge. These field lines are all started near the point
+       charge at the origin, following 
+   <math xmlns="http://www.w3.org/1998/Math/MathML" display='inline'>
+     <msup>
+       <mi>x</mi>
+       <mn>2</mn>
+     </msup>
+     <mo>+</mo>
+     <msup>
+       <mi>y</mi>
+       <mn>2</mn>
+     </msup>
+     <mo>+</mo>
+     <msup>
+       <mi>z</mi>
+       <mn>2</mn>
+     </msup>
+     <mo>=</mo>
+     <mn>4</mn>
+   </math>
+      </p>
+<pre>
+    /*
+     * Start a set of field lines near a positive charge at the
+     * origin.
+     */
+    function placeStartPoints(fieldRenderer)
+    {
+      fieldRenderer.addStartPoint( 2.0,  0.0,  0.0,    1.0)
+                   .addStartPoint(-2.0,  0.0,  0.0,    1.0)
+                   .addStartPoint( 0.0,  2.0,  0.0,    1.0)
+                   .addStartPoint( 0.0, -2.0,  0.0,    1.0)
+                   .addStartPoint( 1.0,  1.0,  1.4142, 1.0)
+                   .addStartPoint( 1.0,  1.0, -1.4142, 1.0)
+                   .addStartPoint( 1.0, -1.0,  1.4142, 1.0)
+                   .addStartPoint( 1.0, -1.0, -1.4142, 1.0)
+                   .addStartPoint(-1.0,  1.0,  1.4142, 1.0)
+                   .addStartPoint(-1.0,  1.0, -1.4142, 1.0)
+                   .addStartPoint(-1.0, -1.0,  1.4142, 1.0)
+                   .addStartPoint(-1.0, -1.0, -1.4142, 1.0);
+
+      return fieldRenderer;
+    }
+</pre>
+
+      <h4>The fieldRenderer</h4>
+      <p>
+        The fieldRenderer tracks all the charges and Gaussian surfaces, generates
+       field lines, and renders all of these into the canvas.
+      </p>
+<pre>
+
+    var drawingSurface;
+    var renderer;
+
+    drawingSurface = document.getElementById('drawingSurface');
+    renderer       = new fieldRenderer(drawingSurface);
+    renderer       = placeCharges(renderer);
+    renderer       = placeStartPoints(renderer);
+</pre>
+
+    <h3>Drawing A Dipole</h3>
+      <p>
+        A system of two charges is almost as easy as a single charge. This example
+        places two charges, a positive charge at (-30, 0, 0) and a negative charge
+        at (30, 0, 0). The seed points for a set of field lines are then clustered
+        around the positive charge. As expected, those field lines loop around to
+        the negative charge.
+      </p>
+
+        <figure class="right">
+          <!--A blank area we can draw on with JavaScript. -->
+          <canvas id="anotherDrawingSurface" width="300px" height="300px"></canvas>
+          <figcaption>Now we see how easy it is to draw the dipole.</figcaption>
+        </figure>
+
+      <h4>Another Canvas</h4>
+      <p>
+        As with the first example, we start by defining a drawing surface, being careful
+        to give it a unique id.
+      </p>
+<pre>
+    &lt;canvas id="anotherDrawingSurface" width="300px" height="300px"&gt;&lt;/canvas&gt;
+</pre>
+    <h4>Defining Two Charges</h4>
+    <p>
+      This example places two charges, equal in magnitude, but opposite in charge.
+      A positive charge, charge1, is placed at (-30, 0, 0) and a negative charge,
+      charge2, is placed at (30, 0, 0). 
+    </p>
+<pre>
+    function placeMoreCharges(fieldRenderer)
+    {
+      var charge1;
+      var charge2;
+
+      // Each charge has a charge, then x, y, z coordinates.
+      // Each of these is a floating point number.
+      charge1 = new Charge( 1.0, -30.0,  0.0, 0.0);
+      charge2 = new Charge(-1.0,  30.0,  0.0, 0.0);
+
+      fieldRenderer.addCharge(charge1)
+                   .addCharge(charge2);
+
+      return fieldRenderer;
+    }
+</pre>
+
+  <h4>More Field Lines</h4>
+  <p>
+    The start point for each field line lies on a sphere of radius 2
+   around the positive charge. So, they obey the equation
+   <math xmlns="http://www.w3.org/1998/Math/MathML" display='inline'>
+     <msup>
+       <mrow>
+         <mo>(</mo>
+           <mrow>
+             <mi>x</mi>
+             <mo>+</mo>
+             <mn>30</mn>
+           </mrow>
+         <mo>)</mo>
+       </mrow>
+       <mn>2</mn>
+     </msup>
+     <mo>+</mo>
+     <msup>
+       <mi>y</mi>
+       <mn>2</mn>
+     </msup>
+     <mo>+</mo>
+     <msup>
+       <mi>z</mi>
+       <mn>2</mn>
+     </msup>
+     <mo>=</mo>
+     <mn>4</mn>
+   </math>
+  </p>
+<pre>
+    function placeMoreStartPoints(fieldRenderer)
+    {
+      fieldRenderer.addStartPoint(-28.0,   0.0,   0.0,    1.0)
+                   .addStartPoint(-30.0,   2.0,   0.0,    1.0)
+                   .addStartPoint(-30.0,  -2.0,   0.0,    1.0)
+                   .addStartPoint(-29.0,   1.0,   1.4142, 1.0)
+                   .addStartPoint(-29.0,   1.0,  -1.4142, 1.0)
+                   .addStartPoint(-29.0,  -1.0,   1.4142, 1.0)
+                   .addStartPoint(-29.0,  -1.0,  -1.4142, 1.0)
+                   .addStartPoint(-31.0,   1.0,   1.4142, 1.0)
+                   .addStartPoint(-31.0,   1.0,  -1.4142, 1.0)
+                   .addStartPoint(-31.0,  -1.0,   1.4142, 1.0)
+                   .addStartPoint(-31.0,  -1.0,  -1.4142, 1.0)
+                   .addStartPoint(-31.31,  0.54,  1.4142, 1.0)
+                   .addStartPoint(-31.31,  0.54, -1.4142, 1.0)
+                   .addStartPoint(-31.31, -0.54,  1.4142, 1.0)
+                   .addStartPoint(-31.31, -0.54, -1.4142, 1.0);
+
+      return fieldRenderer;
+    }
+</pre>
+
+      <h4>Another fieldRenderer</h4>
+      <p>
+        This time the fieldRenderer works with a slightly different set of charges and
+       field lines.
+      </p>
+<pre>
+    drawingSurface = document.getElementById('anotherDrawingSurface');
+    renderer       = new fieldRenderer(drawingSurface);
+    renderer       = placeMoreCharges(renderer);
+    renderer       = placeMoreStartPoints(renderer);
+</pre>
+  
+      <h3>Adding A Gaussian Surface</h3>
+      <p>
+        Adding a Gaussian Sphere around the dipole is very easy. Simply define
+       the Gaussian sphere and add it to the fieldRenderer.
+      </p>
+      <figure class="right">
+        <!--A blank area we can draw on with JavaScript. -->
+        <canvas id="yetAnotherDrawingSurface" width="300px" height="300px"></canvas>
+        <figcaption>A classic Gaussian surface example. The fields lines radiate<br />
+                    out from the charge and cross the Gaussian sphere.</figcaption>
+      </figure>
+
+      <h4>Yet Another Canvas</h4>
+      <p>
+        As always, start by defining a drawing surface.
+      </p>
+<pre>
+    &lt;canvas id="yetAnotherDrawingSurface" width="300px" height="300px"&gt;&lt;/canvas&gt;
+</pre>
+      <h4>Yet Another fieldRenderer</h4>
+        <p>
+          This time we will reuse the charges and field lines from the dipole, but we will
+         add a Gaussian surface, a sphere centered at the origin and with a radius of 40.
+        </p>
+<!-- Prevent overlap of the preformatted code and the figure -->
+<br clear="all" />
+<pre>
+    var gaussianSurface;
+
+    drawingSurface  = document.getElementById('yetAnotherDrawingSurface');
+    renderer        = new fieldRenderer(drawingSurface);
+    renderer        = placeMoreCharges(renderer);
+    renderer        = placeMoreStartPoints(renderer);
+    gaussianSurface = new gaussianSphere(0.0, 0.0, 0.0, 40.0);
+    renderer        = renderer.addGaussianSurface(gaussianSurface);
+</pre>
+        <p>
+        </p>
+
+        <br clear="all" />
+
+        <div class="footnote">
+        1) In the near future even this step will be greatly simplified with the
+           automatic placement of field lines proportional to field strength.
+        </div>
+
+        <hr />
+        <span class="floatleft">Previous: <a href = "gaussianSurfaces.html">Gauss's Law Examples</a></span>
+        <br clear="all" />
+        <hr />
+    </div>
+    </div>
+  </div>
+  <script type="text/javascript">
+    "use strict";
+
+    var drawingSurface;
+    var gaussianSurface;
+    var renderer;
+
+
+    function tryLog(string)
+    {
+      if(this.console)
+      {
+        console.log(string);
+      }
+    }
+
+    /*
+     * This function creates the charges and adds them to the field renderer.
+     * Edit this to change the charge configuration modeled in this illustration.
+     */
+    function placeCharges(fieldRenderer)
+    {
+      var charge;
+
+      charge = new Charge(1.0, 0.0, 0.0, 0.0);
+
+      fieldRenderer.addCharge(charge);
+
+      return fieldRenderer;
+    }
+
+    function placeMoreCharges(fieldRenderer)
+    {
+      var charge1;
+      var charge2;
+
+      // Each charge has a charge, then x, y, z coordinates.
+      // Each of these is a floating point number.
+      charge1 = new Charge(  1.0, -30.0,  0.0, 0.0);
+      charge2 = new Charge( -1.0,  30.0,  0.0, 0.0);
+
+      fieldRenderer.addCharge(charge1)
+                   .addCharge(charge2);
+
+      return fieldRenderer;
+    }
+
+    /*
+     * This sets the start points of flux or field lines that will be traced
+     * to generate the illustration. Each startpoint is specified with x, y, z,
+     * and sgn. Where (x, y, z) is the coordinate of the point where we start
+     * tracing the field line, and sgn is +1.0 or -1.0 indicating whether the
+     * fiux line is to be traced along, or in opposition to the electric field.
+     * Field lines starting near a negative charge will usually have this
+     * indicator as -1.0.
+     */
+    function placeStartPoints(fieldRenderer)
+    {
+      fieldRenderer.addStartPoint( 2.0,  0.0,  0.0,    1.0)
+                   .addStartPoint(-2.0,  0.0,  0.0,    1.0)
+                   .addStartPoint( 0.0,  2.0,  0.0,    1.0)
+                   .addStartPoint( 0.0, -2.0,  0.0,    1.0)
+                   .addStartPoint( 1.0,  1.0,  1.4142, 1.0)
+                   .addStartPoint( 1.0,  1.0, -1.4142, 1.0)
+                   .addStartPoint( 1.0, -1.0,  1.4142, 1.0)
+                   .addStartPoint( 1.0, -1.0, -1.4142, 1.0)
+                   .addStartPoint(-1.0,  1.0,  1.4142, 1.0)
+                   .addStartPoint(-1.0,  1.0, -1.4142, 1.0)
+                   .addStartPoint(-1.0, -1.0,  1.4142, 1.0)
+                   .addStartPoint(-1.0, -1.0, -1.4142, 1.0);
+
+      return fieldRenderer;
+    }
+
+    function placeMoreStartPoints(fieldRenderer)
+    {
+      fieldRenderer.addStartPoint(-28.0,   0.0,   0.0,    1.0)
+                   .addStartPoint(-30.0,   2.0,   0.0,    1.0)
+                   .addStartPoint(-30.0,  -2.0,   0.0,    1.0)
+                   .addStartPoint(-29.0,   1.0,   1.4142, 1.0)
+                   .addStartPoint(-29.0,   1.0,  -1.4142, 1.0)
+                   .addStartPoint(-29.0,  -1.0,   1.4142, 1.0)
+                   .addStartPoint(-29.0,  -1.0,  -1.4142, 1.0)
+                   .addStartPoint(-31.0,   1.0,   1.4142, 1.0)
+                   .addStartPoint(-31.0,   1.0,  -1.4142, 1.0)
+                   .addStartPoint(-31.0,  -1.0,   1.4142, 1.0)
+                   .addStartPoint(-31.0,  -1.0,  -1.4142, 1.0)
+                   .addStartPoint(-31.31,  0.54,  1.4142, 1.0)
+                   .addStartPoint(-31.31,  0.54, -1.4142, 1.0)
+                   .addStartPoint(-31.31, -0.54,  1.4142, 1.0)
+                   .addStartPoint(-31.31, -0.54, -1.4142, 1.0);
+
+      return fieldRenderer;
+    }
+
+    drawingSurface  = document.getElementById('drawingSurface');
+    renderer        = new fieldRenderer(drawingSurface);
+    renderer        = placeCharges(renderer);
+    renderer        = placeStartPoints(renderer);
+
+
+    drawingSurface  = document.getElementById('anotherDrawingSurface');
+    renderer        = new fieldRenderer(drawingSurface);
+    renderer        = placeMoreCharges(renderer);
+    renderer        = placeMoreStartPoints(renderer);
+
+
+    drawingSurface  = document.getElementById('yetAnotherDrawingSurface');
+    renderer        = new fieldRenderer(drawingSurface);
+    renderer        = placeMoreCharges(renderer);
+    renderer        = placeMoreStartPoints(renderer);
+    gaussianSurface = new gaussianSphere(0.0, 0.0, 0.0, 40.0);
+    renderer        = renderer.addGaussianSurface(gaussianSurface);
+
+
+  </script>
+  <script type="text/javascript">
+    "use strict";
+    var error;
+    var txt;
+    var canvasSupported = !!window.HTMLCanvasElement;
+    if (canvasSupported)
+    { 
+      var myCanvas       = document.createElement('canvas');
+      var gl             = myCanvas.getContext("experimental-webgl")
+                           || myCanvas.getContext("webgl");
+      if (!gl)
+      {
+        txt = "Your browser supports the HTML5 canvas, but does not support WebGL."
+      }
+    }
+    else
+    {
+      txt = "Your browser does not support the HTML5 canvas, which is required for WebGL."
+    }
+
+    if (txt != null)
+    {
+        txt += " To see the examples on this page, please get a <a href"
+            +  "= 'http://get.webgl.org/'>browser that supports WebGL</a>.";
+        error = document.getElementById("nowebgl");
+        error.innerHTML=txt;
+        error.style.display="block";
+    }
+  </script>
+</body>
+</html>

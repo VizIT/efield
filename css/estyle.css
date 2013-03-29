@@ -33,7 +33,10 @@
  {
    text-align: center;
  }
-
+ .logo
+ {
+   border-style: none;
+ }
 div.content
  {
    padding-top:       .20in;
@@ -64,6 +67,13 @@ p.abstract
    float:         left;
    padding:       1% 1% 1% 1%;
    margin-right:  2%;
+   display:       inline;
+ }
+ .floatright
+ {
+   float:         right;
+   padding:       1% 1% 1% 1%;
+   margin-left:   2%;
    display:       inline;
  }
 
@@ -145,7 +155,7 @@ div#main
   min-height:    7in;
 }
 
-figure.center img, figure.center canvas,  figure.center applet
+figure.center img, figure.center canvas,  figure.center applet, math.center
 {
     display:      block;
     margin-right: auto;
@@ -169,3 +179,9 @@ figure figcaption
     text-align: center;
 }
 
+p.error
+{
+    display:      none;
+    border-style: solid;
+    border-color: red;
+}
