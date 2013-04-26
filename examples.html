@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Visualizing an Electric Field With HTML5 and WebGL, Part 2: Gaussian Surfaces</title>
-    <link   rel="prev"             href="gaussianSurfaces.html" />
-    <link   type="text/css"        href="css/estyle.css" rel="stylesheet" />
-    <script type="text/javascript" src="js/charges.js"></script>
+    <title>Visualizing an Electric Field With HTML5 and WebGL, Part 4: Code Examples</title>
+    <link   rel="stylesheet"       href="css/estyle.css" type="text/css">
+    <link   rel="prev"             href="chargedDistributions.html">
+    <link   rel="next"             href="moreExamples.html">
     <script type="text/javascript" src="js/motionEventHandler.js"></script>
     <script type="text/javascript" src="js/WebGL.js"></script>
+    <script type="text/javascript" src="js/geometry.js"></script>
+    <script type="text/javascript" src="js/charges.js"></script>
     <script type="text/javascript" src="js/gaussianSphere.js"></script>
+    <script type="text/javascript" src="js/chargedSphere.js"></script>
     <script type="text/javascript" src="js/efield.js"></script>
     <script type="text/javascript"
             src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
@@ -41,11 +44,11 @@
   </div>
   <div id="right">
     <div id="top">
-      <a href = "http://www.vizitsolutions.com/"><img id="logo" src="images/VizITLogo.png" alt="VizIT Solutions"></a>
+      <a href = "http://www.vizitsolutions.com"><img id="logo" src="images/VizITLogo.png" alt="VizIT Solutions"></a>
     </div>
     <div id="main">
     <div class="content">
-      <h1>Visualizing an Electric Field With HTML5 and WebGL, Part 3: Code Examples</h1>
+      <h1>Visualizing an Electric Field With HTML5 and WebGL, Part 4: Code Examples</h1>
       <p id="nowebgl" class="error"><p>
       <p class="abstract">
         &nbsp;This library provides an easy to use method for generating physically correct
@@ -62,14 +65,17 @@
       <h4>The efield Package</h4>
       <p>
         The package is divided into a set of modules, each with a specific purpose.
-       Include the efield modules in the header of your HTML file.
+       Include the efield modules in the header of your HTML file. Eventually, a build
+       process will be introduced that combines these into a single file.
       </p>
 
 <pre>
-    &lt;script type="text/javascript" src="charges.js"&gt;&lt;/script&gt;
     &lt;script type="text/javascript" src="motionEventHandler.js"&gt;&lt;/script&gt;
     &lt;script type="text/javascript" src="WebGL.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="geometry.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="charges.js"&gt;&lt;/script&gt;
     &lt;script type="text/javascript" src="gaussianSphere.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="chargedSphere.js"&gt;&lt;/script&gt;
     &lt;script type="text/javascript" src="efield.js"&gt;&lt;/script&gt;
 </pre>
 
@@ -169,8 +175,9 @@
 
       <h4>The fieldRenderer</h4>
       <p>
-        The fieldRenderer tracks all the charges and Gaussian surfaces, generates
-       field lines, and renders all of these into the canvas.
+        The <code>fieldRenderer</code> tracks all the charges and Gaussian surfaces,
+       generates field lines, and renders all of these into the canvas. Drawing to
+       the screen does not start until <code>renderer.start()</code> is called.
       </p>
 <pre>
 
@@ -181,6 +188,7 @@
     renderer       = new fieldRenderer(drawingSurface);
     renderer       = placeCharges(renderer);
     renderer       = placeStartPoints(renderer);
+    renderer.start();
 </pre>
 
     <h3>Drawing A Dipole</h3>
@@ -286,20 +294,21 @@
 
       <h4>Another fieldRenderer</h4>
       <p>
-        This time the fieldRenderer works with a slightly different set of charges and
-       field lines.
+        This time the <code>fieldRenderer</code> works with a slightly different
+       set of charges and field lines.
       </p>
 <pre>
     drawingSurface = document.getElementById('anotherDrawingSurface');
     renderer       = new fieldRenderer(drawingSurface);
     renderer       = placeMoreCharges(renderer);
     renderer       = placeMoreStartPoints(renderer);
+    renderer.start();
 </pre>
   
       <h3>Adding A Gaussian Surface</h3>
       <p>
-        Adding a Gaussian Sphere around the dipole is very easy. Simply define
-       the Gaussian sphere and add it to the fieldRenderer.
+        Adding a Gaussian sphere around the dipole is very easy. Simply define
+       the Gaussian sphere and add it to the <code>fieldRenderer</code>.
       </p>
       <figure class="right">
         <!--A blank area we can draw on with JavaScript. -->
@@ -331,6 +340,7 @@
     renderer        = placeMoreStartPoints(renderer);
     gaussianSurface = new gaussianSphere(0.0, 0.0, 0.0, 40.0);
     renderer        = renderer.addGaussianSurface(gaussianSurface);
+    renderer.start();
 </pre>
         <p>
         </p>
@@ -343,7 +353,8 @@
         </div>
 
         <hr />
-        <span class="floatleft">Previous: <a href = "gaussianSurfaces.html">Gauss's Law Examples</a></span>
+        <span class="floatleft">Previous: <a href = "chargedDistributions.html">Charge Distributions</a></span>
+        <span class="floatright">Next: <a href = "moreExamples.html">More Examples</a></span>
         <br clear="all" />
         <hr />
     </div>
@@ -366,8 +377,8 @@
     }
 
     /*
-     * This function creates the charges and adds them to the field renderer.
-     * Edit this to change the charge configuration modeled in this illustration.
+     * Create the charges and add them to the field renderer. Edit this to
+     * change the charge configuration modeled in this visualization.
      */
     function placeCharges(fieldRenderer)
     {
@@ -448,12 +459,14 @@
     renderer        = new fieldRenderer(drawingSurface);
     renderer        = placeCharges(renderer);
     renderer        = placeStartPoints(renderer);
+    renderer.start();
 
 
     drawingSurface  = document.getElementById('anotherDrawingSurface');
     renderer        = new fieldRenderer(drawingSurface);
     renderer        = placeMoreCharges(renderer);
     renderer        = placeMoreStartPoints(renderer);
+    renderer.start();
 
 
     drawingSurface  = document.getElementById('yetAnotherDrawingSurface');
@@ -462,6 +475,7 @@
     renderer        = placeMoreStartPoints(renderer);
     gaussianSurface = new gaussianSphere(0.0, 0.0, 0.0, 40.0);
     renderer        = renderer.addGaussianSurface(gaussianSurface);
+    renderer.start();
 
 
   </script>

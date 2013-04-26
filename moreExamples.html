@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Visualizing an Electric Field With HTML5 and WebGL, Part 5: More Examples</title>
+    <link   rel="stylesheet"       href="css/estyle.css" type="text/css">
+    <link   rel="prev"             href="examples.html">
+    <script type="text/javascript" src="js/motionEventHandler.js"></script>
+    <script type="text/javascript" src="js/WebGL.js"></script>
+    <script type="text/javascript" src="js/geometry.js"></script>
+    <script type="text/javascript" src="js/charges.js"></script>
+    <script type="text/javascript" src="js/gaussianSphere.js"></script>
+    <script type="text/javascript" src="js/chargedSphere.js"></script>
+    <script type="text/javascript" src="js/efield.js"></script>
+    <script type="text/javascript"
+            src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+  </head>
+  <body>
+<!-- Copyright 2013 VizIT Solutions
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+  <div id="left">
+    <div id="topLeft">
+      <div id="topLeftContent">
+        Visualization<br>
+        Instruction<br>
+        Technology<br>
+      </div>
+    </div>
+    <div id="lowerLeft">
+      Education
+    </div>
+  </div>
+  <div id="right">
+    <div id="top">
+      <a href = "http://www.vizitsolutions.com"><img id="logo" src="images/VizITLogo.png" alt="VizIT Solutions"></a>
+    </div>
+    <div id="main">
+    <div class="content">
+      <h1>Visualizing an Electric Field With HTML5 and WebGL, Part 5: More Examples</h1>
+      <p id="nowebgl" class="error"><p>
+      <p class="abstract">
+        &nbsp;
+      </p>
+
+      <h3>A Spherical Charge Distribution</h3>
+      <p>
+        The newest addition is spherical charge distributions. As always start with
+       a canvas. Usually I enclose the canvas in a figure and attach a caption.
+      </p>
+
+      <figure class="right">
+        <!--A blank area we can draw on with JavaScript. -->
+        <canvas id="drawingSurfaceI" width="300px" height="300px"></canvas>
+        <figcaption>A spherical charge distribution of radius 30.</figcaption>
+      </figure>
+
+      <h4>The Canvas</h4>
+      <p>
+       As always start with a canvas. Usually I enclose the canvas in a figure
+       and attach a caption.
+      </p>
+
+<pre>
+        &lt;figure class="right"&gt;
+          &lt;!--A blank area we can draw on with JavaScript. --&gt;
+          &lt;canvas id="drawingSurfaceI" width="300px" height="300px"&gt;&lt;/canvas&gt;
+          &lt;figcaption&gt;A spherical charge distribution of radius 30.&lt;/figcaption&gt;
+        &lt;/figure&gt;
+</pre>
+
+
+      <h4>The Charge Distribution</h4>
+      <p>
+        A spherical charge distribution of charge Q inner radius a and outer
+       radius b at centered at (x,y,z) is defined with:
+<pre>
+  new chargedSphere( Q, x, y, z, a, b);
+</pre>
+       Additional shapes will be added over time.
+      </p>
+      <p>
+       Here we setup a charge of -1 <a href = "http://en.wikipedia.org/wiki/Statcoulomb">statC</a>
+      distributed in a sphere of radius 50 cm centered around the origin.
+      </p>
+<pre>
+    var chargeDistribution;
+
+    chargeDistribution = new chargedSphere( -1.0, 0.0, 0.0, 0.0, 0.0, 50.0);
+</pre>
+
+      <h4>Field Lines</h4>
+      <p>
+        Remember from the previous examples that field lines are specified
+       by providing an (x,y,z) seed point, and sgn as an indicator whether
+       the field line should be traced in the direction of the field line.
+       In this case, we provide a sgn of -1 as we are beginning near a
+       negative charge.  These field lines are all started near the center
+       of the charge distribution, following 
+   <math xmlns="http://www.w3.org/1998/Math/MathML" display='inline'>
+     <msup>
+       <mi>x</mi>
+       <mn>2</mn>
+     </msup>
+     <mo>+</mo>
+     <msup>
+       <mi>y</mi>
+       <mn>2</mn>
+     </msup>
+     <mo>+</mo>
+     <msup>
+       <mi>z</mi>
+       <mn>2</mn>
+     </msup>
+     <mo>=</mo>
+     <mn>1</mn>
+   </math>
+       Another option is to start some of the field lines further out from the
+      center of the charge distribution reflecting the increasing field strength
+      as you progress through the charge. This will likely be the case later when
+      the field lines are generated automatically.
+      </p>
+<pre>
+    /*
+     * Start a set of field lines near the origin.
+     */
+    function placeStartPoints(fieldRenderer)
+    {
+      fieldRenderer.addStartPoint( 0.0,  1.0,   0.0,    -1.0)
+                   .addStartPoint( 0.0, -1.0,   0.0,    -1.0)
+                   .addStartPoint( 1.0,  0.0,   0.0,    -1.0)
+                   .addStartPoint(-1.0,  0.0,   0.0,    -1.0)
+                   .addStartPoint( 0.5,  0.5,   0.7071, -1.0)
+                   .addStartPoint( 0.5,  0.5,  -0.7071, -1.0)
+                   .addStartPoint( 0.5, -0.5,   0.7071, -1.0)
+                   .addStartPoint( 0.5, -0.5,  -0.7071, -1.0)
+                   .addStartPoint(-0.5,  0.5,   0.7071, -1.0)
+                   .addStartPoint(-0.5,  0.5,  -0.7071, -1.0)
+                   .addStartPoint(-0.5, -0.5,   0.7071, -1.0)
+                   .addStartPoint(-0.5, -0.5,  -0.7071, -1.0);
+
+      return fieldRenderer;
+    }
+</pre>
+
+      <h4>The fieldRenderer</h4>
+      <p>
+        The <code>fieldRenderer</code> now accepts a spherical charge distribution,
+       a <code>chargedSphere</code>. Remember <code>renderer.start()</code>
+       to begin rendering to the screen.
+      </p>
+<pre>
+    var chargeDistribution;
+    var drawingSurface;
+    var renderer;
+
+    drawingSurface     = document.getElementById('drawingSurfaceI');
+    renderer           = new fieldRenderer(drawingSurface);
+    renderer           = placeStartPoints(renderer);
+    chargeDistribution = new chargedSphere( -1.0, 0.0, 0.0, 0.0, 0.0, 50.0);
+    renderer           = renderer.addChargeDistribution(chargeDistribution);
+    renderer.start();
+</pre>
+
+    <h3>Adding a Gaussian Surface</h3>
+      <p>
+        Combining these building blocks in innovative ways can generate sophisticated
+       examples. For example, we can place a Gaussian surface within a hollow spherical
+       charge distribution. Zooming in allows you to see that the Gaussian surface is
+       within the inner radius of the charge distribution, and tha the field lines
+       begin within the charge distribution, and so do not impinge on the Gaussian
+       surface.
+      </p>
+
+        <figure class="right">
+          <!--A blank area we can draw on with JavaScript. -->
+          <canvas id="drawingSurfaceII" width="300px" height="300px"></canvas>
+          <figcaption>A charge distribution surrounding a Gaussian surface.</figcaption>
+        </figure>
+
+      <h4>Another Canvas</h4>
+      <p>
+        Define another drawing surface, being careful to give it a unique id.
+      </p>
+<pre>
+        &lt;figure class="right"&gt
+          &lt;!--A blank area we can draw on with JavaScript. --&gt
+          &lt;canvas id="drawingSurfaceII" width="300px" height="300px"&gt&lt;/canvas&gt
+          &lt;figcaption&gtA charge distribution surrounding a Gaussian surface.&lt;/figcaption&gt
+        &lt;/figure&gt
+</pre>
+
+    <h4>A Hollow Charged Sphere</h4>
+    <p>
+       This time we specify an inner radius so the charge is spread out between
+      an inner radius a=20 and an outer radius b=50.
+    </p>
+<pre>
+    var chargeDistribution;
+
+    chargeDistribution = new chargedSphere( -1.0, 0.0, 0.0, 0.0, 20.0, 50.0);
+</pre>
+
+   <h4>The Gaussian Surface</h4>
+   <p>
+     We choose to place the Gaussian surface within the inner radius of the charge
+    distribution so that there will be no net charge within it.
+   </p>
+
+<pre>
+   var gaussianSurface;
+
+   gaussianSurface    = new gaussianSphere(0.0, 0.0, 0.0, 10.0);
+</pre>
+
+  <h4>More Field Lines</h4>
+  <p>
+    The start point for each field line lies on a sphere of radius 21.
+   They will start just inside of the charge dustribution, and well
+   outside of the Gaussian sphere.
+  </p>
+<pre>
+    function placeMoreStartPoints(fieldRenderer)
+    {
+      fieldRenderer.addStartPoint(  0.0,  21.0,   0.0,    -1.0)
+                   .addStartPoint(  0.0, -21.0,   0.0,    -1.0)
+                   .addStartPoint( 21.0,   0.0,   0.0,    -1.0)
+                   .addStartPoint(-21.0,   0.0,   0.0,    -1.0)
+                   .addStartPoint( 10.5,  10.5,   14.849, -1.0)
+                   .addStartPoint( 10.5,  10.5,  -14.849, -1.0)
+                   .addStartPoint( 10.5, -10.5,   14.849, -1.0)
+                   .addStartPoint( 10.5, -10.5,  -14.849, -1.0)
+                   .addStartPoint(-10.5,  10.5,   14.849, -1.0)
+                   .addStartPoint(-10.5,  10.5,  -14.849, -1.0)
+                   .addStartPoint(-10.5, -10.5,   14.849, -1.0)
+                   .addStartPoint(-10.5, -10.5,  -14.849, -1.0);
+
+      return fieldRenderer;
+    }
+</pre>
+
+      <h4>Another fieldRenderer</h4>
+      <p>
+        This <code>fieldRenderer</code> works with a charge distribution, a Gaussian surface,
+       and field lines.
+      </p>
+<pre>
+    drawingSurface     = document.getElementById('drawingSurfaceII');
+    renderer           = new fieldRenderer(drawingSurface);
+    renderer           = placeMoreStartPoints(renderer);
+    gaussianSurface    = new gaussianSphere(0.0, 0.0, 0.0, 10.0);
+    renderer           = renderer.addGaussianSurface(gaussianSurface);
+    chargeDistribution = new chargedSphere( -1.0, 0.0, 0.0, 0.0, 20.0, 50.0);
+    renderer           = renderer.addChargeDistribution(chargeDistribution);
+    renderer.start();
+</pre>
+
+      <p>
+        Other interesting examples include cases where the Gaussian surface
+       completely surrounds the charge distribution and the case where it is
+       embedded within the charge distribution with radius r and a&lt;r&lt;b.
+      </p>
+  
+        <br clear="all" />
+
+        <hr />
+        <span class="floatleft">Previous: <a href = "examples.html">Examples</a></span>
+        <br clear="all" />
+        <hr />
+    </div>
+    </div>
+  </div>
+  <script type="text/javascript">
+
+    var chargeDistribution;
+    var drawingSurface;
+    var gaussianSurface;
+    var renderer;
+
+
+    /*
+     * This sets the start points of flux or field lines that will be traced
+     * to generate the illustration. Each startpoint is specified with x, y, z,
+     * and sgn. Where (x, y, z) is the coordinate of the point where we start
+     * tracing the field line, and sgn is +1.0 or -1.0 indicating whether the
+     * fiux line is to be traced along, or in opposition to the electric field.
+     * Field lines starting near a negative charge will usually have this
+     * indicator as -1.0.
+     */
+    function placeStartPoints(fieldRenderer)
+    {
+      fieldRenderer.addStartPoint( 0.0,  1.0,   0.0,    -1.0)
+                   .addStartPoint( 0.0, -1.0,   0.0,    -1.0)
+                   .addStartPoint( 1.0,  0.0,   0.0,    -1.0)
+                   .addStartPoint(-1.0,  0.0,   0.0,    -1.0)
+                   .addStartPoint( 0.5,  0.5,   0.7071, -1.0)
+                   .addStartPoint( 0.5,  0.5,  -0.7071, -1.0)
+                   .addStartPoint( 0.5, -0.5,   0.7071, -1.0)
+                   .addStartPoint( 0.5, -0.5,  -0.7071, -1.0)
+                   .addStartPoint(-0.5,  0.5,   0.7071, -1.0)
+                   .addStartPoint(-0.5,  0.5,  -0.7071, -1.0)
+                   .addStartPoint(-0.5, -0.5,   0.7071, -1.0)
+                   .addStartPoint(-0.5, -0.5,  -0.7071, -1.0);
+
+      return fieldRenderer;
+    }
+
+    function placeMoreStartPoints(fieldRenderer)
+    {
+      fieldRenderer.addStartPoint(  0.0,  21.0,   0.0,    -1.0)
+                   .addStartPoint(  0.0, -21.0,   0.0,    -1.0)
+                   .addStartPoint( 21.0,   0.0,   0.0,    -1.0)
+                   .addStartPoint(-21.0,   0.0,   0.0,    -1.0)
+                   .addStartPoint( 10.5,  10.5,   14.849, -1.0)
+                   .addStartPoint( 10.5,  10.5,  -14.849, -1.0)
+                   .addStartPoint( 10.5, -10.5,   14.849, -1.0)
+                   .addStartPoint( 10.5, -10.5,  -14.849, -1.0)
+                   .addStartPoint(-10.5,  10.5,   14.849, -1.0)
+                   .addStartPoint(-10.5,  10.5,  -14.849, -1.0)
+                   .addStartPoint(-10.5, -10.5,   14.849, -1.0)
+                   .addStartPoint(-10.5, -10.5,  -14.849, -1.0);
+
+      return fieldRenderer;
+    }
+
+
+    drawingSurface     = document.getElementById('drawingSurfaceI');
+    renderer           = new fieldRenderer(drawingSurface);
+    renderer           = placeStartPoints(renderer);
+    chargeDistribution = new chargedSphere( -1.0, 0.0, 0.0, 0.0, 0.0, 50.0);
+    renderer           = renderer.addChargeDistribution(chargeDistribution);
+    renderer.start();
+
+    drawingSurface     = document.getElementById('drawingSurfaceII');
+    renderer           = new fieldRenderer(drawingSurface);
+    renderer           = placeMoreStartPoints(renderer);
+    gaussianSurface    = new gaussianSphere(0.0, 0.0, 0.0, 10.0);
+    renderer           = renderer.addGaussianSurface(gaussianSurface);
+    chargeDistribution = new chargedSphere( -1.0, 0.0, 0.0, 0.0, 20.0, 50.0);
+    renderer           = renderer.addChargeDistribution(chargeDistribution);
+    renderer.start();
+
+  </script>
+  <script type="text/javascript">
+    var error;
+    var txt;
+    var canvasSupported = !!window.HTMLCanvasElement;
+    if (canvasSupported)
+    { 
+      var myCanvas       = document.createElement('canvas');
+      var gl             = myCanvas.getContext("experimental-webgl")
+                           || myCanvas.getContext("webgl");
+      if (!gl)
+      {
+        txt = "Your browser supports the HTML5 canvas, but does not support WebGL."
+      }
+    }
+    else
+    {
+      txt = "Your browser does not support the HTML5 canvas, which is required for WebGL."
+    }
+
+    if (txt != null)
+    {
+        txt += " To see the examples on this page, please get a <a href"
+            +  "= 'http://get.webgl.org/'>browser that supports WebGL</a>.";
+        error = document.getElementById("nowebgl");
+        error.innerHTML=txt;
+        error.style.display="block";
+    }
+  </script>
+</body>
+</html>

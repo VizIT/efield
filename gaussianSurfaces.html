@@ -2,13 +2,15 @@
 <html>
   <head>
     <title>Visualizing an Electric Field With HTML5 and WebGL, Part 2: Gaussian Surfaces</title>
-    <link   rel="prev"             href="index.html" />
-    <link   rel="next"             href="examples.html" />
-    <link   type="text/css"        href="css/estyle.css" rel="stylesheet" />
-    <script type="text/javascript" src="js/charges.js"></script>
+    <link   rel="stylesheet"       href="css/estyle.css" type="text/css">
+    <link   rel="prev"             href="index.html">
+    <link   rel="next"             href="chargedDistributions.html">
     <script type="text/javascript" src="js/motionEventHandler.js"></script>
     <script type="text/javascript" src="js/WebGL.js"></script>
+    <script type="text/javascript" src="js/geometry.js"></script>
+    <script type="text/javascript" src="js/charges.js"></script>
     <script type="text/javascript" src="js/gaussianSphere.js"></script>
+    <script type="text/javascript" src="js/chargedSphere.js"></script>
     <script type="text/javascript" src="js/efield.js"></script>
     <script type="text/javascript"
             src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
@@ -43,7 +45,7 @@
   </div>
   <div id="right">
     <div id="top">
-      <a href = "http://www.vizitsolutions.com/"><img id="logo" src="images/VizITLogo.png" alt="VizIT Solutions"></a>
+      <a href = "http://www.vizitsolutions.com"><img id="logo" src="images/VizITLogo.png" alt="VizIT Solutions"></a>
     </div>
     <div id="main">
     <div class="content">
@@ -131,7 +133,7 @@
 
         <hr />
         <span class="floatleft">Previous: <a href = "index.html">Introduction</a></span>
-        <span class="floatright">Next: <a href = "examples.html">Code and Examples</a></span>
+        <span class="floatright">Next: <a href = "chargedDistributions.html">Charge Distributions</a></span>
         <br clear="all" />
         <hr />
     </div>
@@ -186,9 +188,8 @@
     }
 
     /*
-     * This function builds the charges creates the charges and places them in a
-     * charges object. Edit this to change the charge configuration modeled in this
-     * illustration.
+     * Create the charges and add them to the field renderer. Edit this to
+     * change the charge configuration modeled in this visualization.
      */
     function placeStillMoreCharges(fieldRenderer)
     {
@@ -209,13 +210,12 @@
 
     /*
      * This sets the start points of flux or field lines that will be traced
-     * the generate the illustration. The result is a two dimensional array
-     * startPoints[n][4]. The first index is the number of the flux line, and the
-     * second index varies from 0-2 for the x, y, and z start coordinates of the
-     * field line. The [3] element of the second index is +1.0 or -1.0 indicating
-     * whether the fiux line is to be traced along, or in opposition to the
-     * electric field. Field lines starting near a negative charge will usually
-     * have this indicator as -1.0.
+     * to generate the illustration. Each startpoint is specified with x, y, z,
+     * and sgn. Where (x, y, z) is the coordinate of the point where we start
+     * tracing the field line, and sgn is +1.0 or -1.0 indicating whether the
+     * fiux line is to be traced along, or in opposition to the electric field.
+     * Field lines starting near a negative charge will usually have this
+     * indicator as -1.0.
      */
     function placeStartPoints(fieldRenderer)
     {
@@ -262,6 +262,7 @@
     renderer       = placeMoreStartPoints(renderer);
     gaussianSurface = new gaussianSphere(0.0, 0.0, 0.0, 28.0);
     renderer        = renderer.addGaussianSurface(gaussianSurface);
+    renderer.start();
 
     drawingSurface = document.getElementById('drawingSurfaceV');
     renderer       = new fieldRenderer(drawingSurface);
@@ -269,6 +270,7 @@
     renderer       = placeMoreStartPoints(renderer);
     gaussianSurface = new gaussianSphere(-30.0, 0.0, 0.0, 28.0);
     renderer        = renderer.addGaussianSurface(gaussianSurface);
+    renderer.start();
 
     drawingSurface  = document.getElementById('drawingSurfaceVI');
     renderer        = new fieldRenderer(drawingSurface);
@@ -276,8 +278,9 @@
     renderer        = placeStartPoints(renderer);
     gaussianSurface = new gaussianSphere(0.0, 0.0, 0.0, 40.0);
     renderer        = renderer.addGaussianSurface(gaussianSurface);
-
+    renderer.start();
   </script>
+
   <script type="text/javascript">
     "use strict";
     var error;

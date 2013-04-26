@@ -155,7 +155,7 @@ div#main
   min-height:    7in;
 }
 
-figure.center img, figure.center canvas,  figure.center applet, math.center
+figure.center img, figure.center canvas,  figure.center applet, figure.center embed, math.center
 {
     display:      block;
     margin-right: auto;
@@ -178,6 +178,13 @@ figure figcaption
     font-style: italic;
     text-align: center;
 }
+
+table.center
+{
+    margin-right: auto;
+    margin-left:  auto;
+}
+
 
 p.error
 {
