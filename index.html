@@ -2,12 +2,14 @@
 <html>
   <head>
     <title>Visualizing an Electric Field With HTML5 and WebGL, Part 1: Introduction</title>
-    <link   rel="next"             href="gaussianSurfaces.html" />
-    <link   type="text/css"        href="css/estyle.css" rel="stylesheet" />
-    <script type="text/javascript" src="js/charges.js"></script>
+    <link rel="next" href = "gaussianSurfaces.html" />
+    <link rel="stylesheet" href="css/estyle.css" type="text/css">
     <script type="text/javascript" src="js/motionEventHandler.js"></script>
     <script type="text/javascript" src="js/WebGL.js"></script>
+    <script type="text/javascript" src="js/geometry.js"></script>
+    <script type="text/javascript" src="js/charges.js"></script>
     <script type="text/javascript" src="js/gaussianSphere.js"></script>
+    <script type="text/javascript" src="js/chargedSphere.js"></script>
     <script type="text/javascript" src="js/efield.js"></script>
   </head>
   <body>
@@ -38,7 +40,7 @@
   </div>
   <div id="right">
     <div id="top">
-      <a href = "http://www.vizitsolutions.com/"><img id="logo" src="images/VizITLogo.png" alt="VizIT Solutions"></a>
+      <a href = "http://www.vizitsolutions.com"><img id="logo" src="images/VizITLogo.png" alt="VizIT Solutions"></a>
     </div>
     <div id="main">
     <div class="content">
@@ -162,9 +164,8 @@
     }
 
     /*
-     * This function builds the charges creates the charges and places them in a
-     * charges object. Edit this to change the charge configuration modeled in this
-     * illustration.
+     * Create the charges and register them with the renderer. Edit this
+     * to change the charge configuration modeled in this illustration.
      */
     function placeCharges(fieldRenderer)
     {
@@ -217,13 +218,12 @@
 
     /*
      * This sets the start points of flux or field lines that will be traced
-     * the generate the illustration. The result is a two dimensional array
-     * startPoints[n][4]. The first index is the number of the flux line, and the
-     * second index varies from 0-2 for the x, y, and z start coordinates of the
-     * field line. The [3] element of the second index is +1.0 or -1.0 indicating
-     * whether the fiux line is to be traced along, or in opposition to the
-     * electric field. Field lines starting near a negative charge will usually
-     * have this indicator as -1.0.
+     * to generate the illustration. Each startpoint is specified with x, y, z,
+     * and sgn. Where (x, y, z) is the coordinate of the point where we start
+     * tracing the field line, and sgn is +1.0 or -1.0 indicating whether the
+     * fiux line is to be traced along, or in opposition to the electric field.
+     * Field lines starting near a negative charge will usually have this
+     * indicator as -1.0.
      */
     function placeStartPoints(fieldRenderer)
     {
@@ -268,16 +268,19 @@
     renderer       = new fieldRenderer(drawingSurface);
     renderer       = placeCharges(renderer);
     renderer       = placeStartPoints(renderer);
+    renderer.start();
 
     drawingSurface = document.getElementById('drawingSurfaceII');
     renderer       = new fieldRenderer(drawingSurface);
     renderer       = placeMoreCharges(renderer);
     renderer       = placeMoreStartPoints(renderer);
+    renderer.start();
 
     drawingSurface = document.getElementById('drawingSurfaceIII');
     renderer       = new fieldRenderer(drawingSurface);
     renderer       = placeStillMoreCharges(renderer);
     renderer       = placeStartPoints(renderer);
+    renderer.start();
 
   </script>
   <script type="text/javascript">

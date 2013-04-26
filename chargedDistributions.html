@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Visualizing an Electric Field With HTML5 and WebGL, Part 3: Charge Distributions</title>
+    <link   rel="stylesheet"       href="css/estyle.css" type="text/css">
+    <link   rel="prev"             href="gaussianSurfaces.html">
+    <link   rel="next"             href="examples.html">
+    <script type="text/javascript" src="js/motionEventHandler.js"></script>
+    <script type="text/javascript" src="js/WebGL.js"></script>
+    <script type="text/javascript" src="js/geometry.js"></script>
+    <script type="text/javascript" src="js/charges.js"></script>
+    <script type="text/javascript" src="js/gaussianSphere.js"></script>
+    <script type="text/javascript" src="js/chargedSphere.js"></script>
+    <script type="text/javascript" src="js/efield.js"></script>
+    <script type="text/javascript"
+            src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+
+  </head>
+  <body>
+<!-- Copyright 2013 VizIT Solutions
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+  <div id="left">
+    <div id="topLeft">
+      <div id="topLeftContent">
+        Visualization<br>
+        Instruction<br>
+        Technology<br>
+      </div>
+    </div>
+    <div id="lowerLeft">
+      Education
+    </div>
+  </div>
+  <div id="right">
+    <div id="top">
+      <a href = "http://www.vizitsolutions.com"><img id="logo" src="images/VizITLogo.png" alt="VizIT Solutions"></a>
+    </div>
+    <div id="main">
+    <div class="content">
+        <h1>Visualizing an Electric Field With HTML5 and WebGL, Part 3: Charge Distributions</h1>
+        <p id="nowebgl" class="error"><p>
+        <p class="abstract">
+          &nbsp;Real problems are rarely confined to configurations of point charges. The next
+          step is to work with uniform charge distributions.
+        </p>
+
+        <figure class="right">
+          <!--A blank area we can draw on with JavaScript. -->
+          <canvas id="drawingSurfaceI" width="300px" height="300px"></canvas>
+          <figcaption>A spherical charge distrbution enveloping a gausian surface.</figcaption>
+        </figure>
+
+
+        <p>
+          It is now possible to define spherical charge distributions, which are represented
+         by translucent shapes. This allows other components of the system to be viewed through
+         the charge distribution. This first example is of a spherical charge
+         distribution with inner radius a=20 and outer radius b=50. This charge distribution
+         completely surrounds a gaussian surface with r=10. It is now possible to zoom in
+         and see that the gaussian surface does not enclose any charge.
+        </p>
+
+        <figure class="left">
+          <!--A blank area we can draw on with JavaScript. -->
+          <canvas id="drawingSurfaceII" width="300px" height="300px"></canvas>
+          <figcaption>The gaussian surface completely surrounds the charge.</figcaption>
+        </figure>
+
+        <p>
+          The other example in this set shows the gaussian sphere surrounding the
+         charge distribution. Of course it is possible to draw the gaussian surface
+         at an arbitrary poistion, and in the long term it will be possible to move
+         and resize elements, so that it will be possible to move the gaussian surface
+         through the charge distribution, allowing for much more interesting and lively
+         discussions.
+        </p>
+
+        
+        <br clear="all" />
+
+        <hr />
+        <span class="floatleft">Previous: <a href = "gaussianSurfaces.html">Gauss's Law Examples</a></span>
+        <span class="floatright">Next: <a href = "examples.html">Code and Examples</a></span>
+        <br clear="all" />
+        <hr />
+    </div>
+    </div>
+  </div>
+  <script type="text/javascript">
+    "use strict";
+
+    var chargeDistribution;
+    var drawingSurface;
+    var gaussianSurface;
+    var renderer;
+
+
+    function tryLog(string)
+    {
+      if(this.console)
+      {
+        console.log(string);
+      }
+    }
+
+    /*
+     * This sets the start points of flux or field lines that will be traced
+     * to generate the illustration. Each startpoint is specified with x, y, z,
+     * and sgn. Where (x, y, z) is the coordinate of the point where we start
+     * tracing the field line, and sgn is +1.0 or -1.0 indicating whether the
+     * fiux line is to be traced along, or in opposition to the electric field.
+     * Field lines starting near a negative charge will usually have this
+     * indicator as -1.0.
+     */
+    function placeStartPoints(fieldRenderer)
+    {
+      fieldRenderer.addStartPoint(  0.0,  21.0,   0.0,    -1.0)
+                   .addStartPoint(  0.0, -21.0,   0.0,    -1.0)
+                   .addStartPoint( 21.0,   0.0,   0.0,    -1.0)
+                   .addStartPoint(-21.0,   0.0,   0.0,    -1.0)
+                   .addStartPoint( 10.5,  10.5,   14.849, -1.0)
+                   .addStartPoint( 10.5,  10.5,  -14.849, -1.0)
+                   .addStartPoint( 10.5, -10.5,   14.849, -1.0)
+                   .addStartPoint( 10.5, -10.5,  -14.849, -1.0)
+                   .addStartPoint(-10.5,  10.5,   14.849, -1.0)
+                   .addStartPoint(-10.5,  10.5,  -14.849, -1.0)
+                   .addStartPoint(-10.5, -10.5,   14.849, -1.0)
+                   .addStartPoint(-10.5, -10.5,  -14.849, -1.0);
+
+      return fieldRenderer;
+    }
+
+    drawingSurface     = document.getElementById('drawingSurfaceI');
+    renderer           = new fieldRenderer(drawingSurface);
+    renderer           = placeStartPoints(renderer);
+    gaussianSurface    = new gaussianSphere(0.0, 0.0, 0.0, 10.0);
+    renderer           = renderer.addGaussianSurface(gaussianSurface);
+    chargeDistribution = new chargedSphere( -1, 0.0, 0.0, 0.0, 20.0, 50.0);
+    renderer           = renderer.addChargeDistribution(chargeDistribution);
+    renderer.start();
+
+
+    drawingSurface     = document.getElementById('drawingSurfaceII');
+    renderer           = new fieldRenderer(drawingSurface);
+    renderer           = placeStartPoints(renderer);
+    gaussianSurface    = new gaussianSphere(0.0, 0.0, 0.0, 60.0);
+    renderer           = renderer.addGaussianSurface(gaussianSurface);
+    chargeDistribution = new chargedSphere( -1, 0.0, 0.0, 0.0, 20.0, 50.0);
+    renderer           = renderer.addChargeDistribution(chargeDistribution);
+    renderer.start();
+  </script>
+
+  <script type="text/javascript">
+    "use strict";
+    var error;
+    var txt;
+    var canvasSupported = !!window.HTMLCanvasElement;
+    if (canvasSupported)
+    { 
+      var myCanvas       = document.createElement('canvas');
+      var gl             = myCanvas.getContext("experimental-webgl")
+                           || myCanvas.getContext("webgl");
+      if (!gl)
+      {
+        txt = "Your browser supports the HTML5 canvas, but does not support WebGL."
+      }
+    }
+    else
+    {
+      txt = "Your browser does not support the HTML5 canvas, which is required for WebGL."
+    }
+
+    if (txt != null)
+    {
+        txt += " To see the examples on this page, please get a <a href"
+            +  "= 'http://get.webgl.org/'>browser that supports WebGL</a>.";
+        error = document.getElementById("nowebgl");
+        error.innerHTML=txt;
+        error.style.display="block";
+    }
+  </script>
+</body>
+</html>

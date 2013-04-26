@@ -1,5 +1,7 @@
-// Represents a single charge in a set of charges
-// A charge has position and a charge in nano-Columbs.
+/**
+ * Represents a single charge in a set of charges
+ * A charge has position and a charge in nano-Columbs.
+ */
 function Charge(Q_, x_, y_, z_)
 {
     var Q        = Q_;
@@ -38,7 +40,7 @@ function Charge(Q_, x_, y_, z_)
       deltaZ      = z - position[2];
 
       r2          = deltaX*deltaX + deltaY*deltaY + deltaZ*deltaZ;
-      if (r2 < 0)
+      if (r2 <= 0)
       {
         return field;
       }
@@ -53,7 +55,9 @@ function Charge(Q_, x_, y_, z_)
     }
 }
 
-
+/**
+ * A collection of point charges. TODO Is this still useful?
+ */
 function Charges()
 {
     // Add a charge to the configuration of charges represented by
@@ -110,7 +114,7 @@ function Charges()
 }
 
 
-function fluxLine(charges_)
+function fluxLine(charges_, chargeDistributions_)
 {
     // Lines that make up the arrow are drawn with this length.
     var arrowSize;
@@ -118,6 +122,7 @@ function fluxLine(charges_)
     var arrowSpacing;
     // A Float32Array containing two lines (four points) for each arrow.
     var arrows;
+    var distributions;
     // Each point represents a distance ds along the field line.
     var ds;
     // The charge configuration we are drawing the field lines for.
@@ -136,6 +141,8 @@ function fluxLine(charges_)
     var startX;
     var startY;
     var startZ;
+
+    distributions = chargeDistributions_;
 
     this.getArrows    = function()
     {
@@ -254,7 +261,7 @@ function fluxLine(charges_)
      * Generate two lines as an arrow head along the field line indicating the
      * direction of the electric field.
      */
-    this.drawArrow          = function(x0, y0, z0, sign, field, f, arrowSize, narrows)
+    this.drawArrow          = function(x0, y0, z0, field, f, arrowSize, narrows)
     {
         var asx;
         var asy;
@@ -308,9 +315,9 @@ function fluxLine(charges_)
         ny     = ny*resize;
         nz     = nz*resize;
 
-        asx    = sign*arrowSize*exnorm;
-        asy    = sign*arrowSize*eynorm;
-        asz    = sign*arrowSize*eznorm;
+        asx    = arrowSize*exnorm;
+        asy    = arrowSize*eynorm;
+        asz    = arrowSize*eznorm;
 
         x1     = x0 - asx + nx;
         y1     = y0 - asy + ny;
@@ -337,12 +344,30 @@ function fluxLine(charges_)
 
     }
 
+    /**
+     * Add the fields from charge distributions into an existing field array.
+     */
+    this.addDistributionFields = function(f, distributions, x, y, z)
+    {
+      var ndistributions;
+      var newfield;
+
+      ndistributions = distributions.length;
+
+      for(var i=0; i<ndistributions; i++)
+      {
+        newfield = distributions[i].getField(x, y, z)
+        f[0]    += newfield[0];
+        f[1]    += newfield[1];
+        f[2]    += newfield[2];
+      }
+      return f;
+    }
+
     /*
      * Trace a field line starting at the given x, y, z coordinates.
      * Each step of length ds has components (Ex/E*ds, Ey/E*ds, Ez/E*ds).
-     * Steps is usually a Float32Array of size 3*maxPoints + 1. The 0th
-     * element of steps will be populated with the number of steps taken
-     * tracing the field line.
+     * points is usually a Float32Array of size 3*maxPoints.
      */
     this.trace = function()
     {
@@ -351,7 +376,7 @@ function fluxLine(charges_)
         var f;
         var field;
         var i;
-        // Offset into points arraw where we are writing the curent point.
+        // Offset into points array where we are writing the curent point.
         // Advances by 3 for every point.
         var offset;
         var x;
@@ -371,6 +396,7 @@ function fluxLine(charges_)
             points[offset+1] = y;
             points[offset+2] = z;
             field            = charges.getField(x, y, z);
+            field            = this.addDistributionFields(field, distributions, x, y, z)
             f                = Math.sqrt(field[0] * field[0] + field[1] * field[1] + field[2] * field[2]);
 
             if (f == 0)
@@ -388,7 +414,7 @@ function fluxLine(charges_)
             if (deltaS > arrowSpacing)
             {
                 deltaS = 0;
-                this.drawArrow(x, y, z, sign, field, f, arrowSize, narrows);
+                this.drawArrow(x, y, z, field, f, arrowSize, narrows);
                 narrows++;
             }
         }
@@ -396,7 +422,6 @@ function fluxLine(charges_)
         // The number of points populating this array.
         npoints = i;
     }
-
 }
 
 

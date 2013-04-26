@@ -1,3 +1,4 @@
+"use strict";
 /*
  * startPoints: User defined start points for each flux line
  */
@@ -9,6 +10,8 @@ function fieldRenderer(drawingSurface_)
   var arrowBuffers;
   // Vertex array buffer for charges and positions.
   var chargeBuffer;
+  // A list of charge distributions.
+  var chargeDistributions;
   // This program draws the representation of the not quite point charges.
   var chargeImageProgram;
   // A generic container capable of containing an arbitrary number of charges.
@@ -27,6 +30,10 @@ function fieldRenderer(drawingSurface_)
   var gl;
   // Gaussian surfces - closed 3D surfaces.
   var gaussianSurfaces;
+  // Do not rerender in response to an event until after efield is initialized.  
+  var initialized;
+  // Wait for the setup to finish before rendering the first frame.
+  var latch;
   // Model-View matrix for use in all programs.
   var modelViewMatrix;
   var normalMatrix;
@@ -43,24 +50,29 @@ function fieldRenderer(drawingSurface_)
   var scale;
   // Start points for tracing field lines
   var startPoints;
-  // Handles to surface geometry buffers on the graphics cards.
-  var surfaceGeometryBuffers;
-  var surfaceIndicesBuffers;
-  var surfaceNormalBuffers;
   // Program for drawing surfaces - Gaussian for now, eventually charged surfaces.
   var surfaceProgram;
+  var vertexRegistry;
 
+  chargeDistributions    = new Array();
   charges                = new Charges();
   drawingSurface         = drawingSurface_;
   gaussianSurfaces       = new Array();
+  initialized            = false;
   startPoints            = new Array();
-  surfaceGeometryBuffers = new Array();
-  surfaceIndicesBuffers  = new Array();
-  surfaceNormalBuffers   = new Array();
+  vertexRegistry         = new GeometryEngine.VertexRegistry();
 
   this.addGaussianSurface    = function(surface)
   {
+    surface.setVertexRegistry(vertexRegistry);
     gaussianSurfaces.push(surface);
+    return this;
+  }
+
+  this.addChargeDistribution = function(distribution)
+  {
+    distribution.setVertexRegistry(vertexRegistry);
+    chargeDistributions.push(distribution);
     return this;
   }
 
@@ -91,7 +103,6 @@ function fieldRenderer(drawingSurface_)
     // directionalLighting a vector indicating the direction for directional lighting.
     //                     Directional lighting helps bring out the shape of surfaces
     // directionalColor the color for the directional lighting
-    // 
     vertexShaderSource = "attribute vec3 normal;"
                        + "attribute vec3 position;"
                        + ""
@@ -99,6 +110,7 @@ function fieldRenderer(drawingSurface_)
                        + "uniform   vec3 directionalLighting;"
                        + "uniform   vec3 directionalColor;"
                        + "uniform   mat4 modelViewMatrix;"
+                       + "uniform   mat4 globalModelViewMatrix;"
                        + "uniform   mat3 normalMatrix;"
                        + "uniform   mat4 projectionMatrix;"
                        + ""
@@ -106,7 +118,7 @@ function fieldRenderer(drawingSurface_)
                        + ""
                        + "void main(void)"
                        + "{"
-                       + "  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);"
+                       + "  gl_Position = projectionMatrix * globalModelViewMatrix * modelViewMatrix * vec4(position, 1.0);"
                        + ""
                        + "  vec3  transformedNormal         = normalMatrix * normal;"
                        + "  float directionalLightWeighting = max(dot(transformedNormal, directionalLighting), 0.0);"
@@ -189,7 +201,7 @@ function fieldRenderer(drawingSurface_)
                                + "}";
  
     // Note the use of gl_PointCoord for the texture coordinate.
-    var fragmentShaderSource =   "precision highp float;"
+    var fragmentShaderSource =   "precision lowp float;"
                                + "varying float     vCharge;"
                                + "uniform sampler2D positiveChargeSampler;"
                                + "uniform sampler2D negativeChargeSampler;"
@@ -315,45 +327,55 @@ function fieldRenderer(drawingSurface_)
     }
   }
 
-  this.drawFullSurface      = function(surfaceGeometryBuffer, surfaceNormalBuffer, surfaceIndicesBuffer, nindices)
-  {
-    bindBuffer(gl, surfaceGeometryBuffer, 'position', surfaceProgram, 3, gl.FLOAT, 0, 0);
-    bindBuffer(gl, surfaceNormalBuffer,   'normal',   surfaceProgram, 3, gl.FLOAT, 0, 0);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, surfaceIndicesBuffer);
-
-    gl.drawElements(gl.TRIANGLES, nindices, gl.UNSIGNED_SHORT, 0);
-  }
-
-  this.drawGaussianSurfaces = function(gl,                     surfaceProgram,       projectionMatrix,
-                                       modelViewMatrix,        normalMatrix,         surfaces,
-                                       surfaceGeometryBuffers, surfaceNormalBuffers, surfaceIndicesBuffers)
+  this.drawChargeDistributions = function(gl,                     surfaceProgram,         projectionMatrix,
+                                          globalModelViewMatrix,  normalMatrix,           distributions)
   {
     console.assert(surfaceProgram != null);
-    var nsurfaces;
+    var ndistributions;
 
-    // Make this the currently active program - note that when we draw charges we will
-    // need multiple programs. Possibly another one for arrows as well.
+    // Make this the currently active program
     gl.useProgram(surfaceProgram);
 
-    loadUniformMatrix4fv(gl, surfaceProgram, "modelViewMatrix",  modelViewMatrix);
-    loadUniformMatrix3fv(gl, surfaceProgram, "normalMatrix",     normalMatrix);
-    loadUniformMatrix4fv(gl, surfaceProgram, "projectionMatrix", projectionMatrix);
+    loadUniformMatrix4fv(gl, surfaceProgram, "globalModelViewMatrix",  globalModelViewMatrix);
+    loadUniformMatrix3fv(gl, surfaceProgram, "normalMatrix",           normalMatrix);
+    loadUniformMatrix4fv(gl, surfaceProgram, "projectionMatrix",       projectionMatrix);
 
-    // RGBA for an off white translucent surface.
-    loadUniform4f(gl, surfaceProgram, "surfaceColor",        0.8, 0.8, 0.8, 0.5);
     loadUniform3f(gl, surfaceProgram, "ambientLighting",     0.3, 0.3, 0.3);
     loadUniform3f(gl, surfaceProgram, "directionalLighting", 1.0, 1.0, 1.0);
     loadUniform3f(gl, surfaceProgram, "directionalColor",    0.4, 0.4, 0.4);
 
-    nsurfaces = surfaceGeometryBuffers.length;
+    ndistributions = distributions.length;
+    
+    for (var i=0; i<ndistributions; i++)
+    {
+      distributions[i].render(gl, surfaceProgram)
+    }
+  }
+
+  this.drawGaussianSurfaces = function(gl,                     surfaceProgram,         projectionMatrix,
+                                       globalModelViewMatrix,  normalMatrix,           surfaces)
+  {
+    console.assert(surfaceProgram != null);
+    var nsurfaces;
+
+    // Make this the currently active program
+    gl.useProgram(surfaceProgram);
+
+    loadUniformMatrix4fv(gl, surfaceProgram, "globalModelViewMatrix",  globalModelViewMatrix);
+    loadUniformMatrix3fv(gl, surfaceProgram, "normalMatrix",           normalMatrix);
+    loadUniformMatrix4fv(gl, surfaceProgram, "projectionMatrix",       projectionMatrix);
+
+    // RGBA for an off white translucent surface.
+    loadUniform4f(gl, surfaceProgram, "surfaceColor",        0.5, 0.5, 0.5, 0.5);
+    loadUniform3f(gl, surfaceProgram, "ambientLighting",     0.3, 0.3, 0.3);
+    loadUniform3f(gl, surfaceProgram, "directionalLighting", 1.0, 1.0, 1.0);
+    loadUniform3f(gl, surfaceProgram, "directionalColor",    0.4, 0.4, 0.4);
+
+    nsurfaces = surfaces.length;
     
     for (var i=0; i<nsurfaces; i++)
     {
-      gl.cullFace(gl.FRONT);
-      this.drawFullSurface(surfaceGeometryBuffers[i], surfaceNormalBuffers[i], surfaceIndicesBuffers[i], surfaces[i].getNindices());
-
-      gl.cullFace(gl.BACK);
-      this.drawFullSurface(surfaceGeometryBuffers[i], surfaceNormalBuffers[i], surfaceIndicesBuffers[i], surfaces[i].getNindices());
+      surfaces[i].render(gl, surfaceProgram)
     }
   }
 
@@ -375,6 +397,11 @@ function fieldRenderer(drawingSurface_)
 
   this.render = function()
   {
+    // If setup isn't finished, just return - we can't possibly render a frame.
+    if (!initialized)
+    {
+      return;
+    }
     // Clear previous color and depth values - do this just before the first set of elements are drawn
     gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 
@@ -387,15 +414,24 @@ function fieldRenderer(drawingSurface_)
                        modelViewMatrix,     charges,              startPoints,
                        fluxLineBuffers,     fluxDirectionBuffers);
 
-    if (gaussianSurfaces.length > 0)
+    if (gaussianSurfaces.length > 0 || chargeDistributions.length > 0)
     {
       gl.enable(gl.BLEND);
       gl.enable(gl.CULL_FACE);
-      gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      if (chargeDistributions.length > 0)
+      {
+        this.drawChargeDistributions(gl,              surfaceProgram, projectionMatrix,
+                                     modelViewMatrix, normalMatrix,   chargeDistributions);
+      }
 
-      this.drawGaussianSurfaces(gl,                     surfaceProgram,       projectionMatrix,
-                                modelViewMatrix,        normalMatrix,         gaussianSurfaces,
-                                surfaceGeometryBuffers, surfaceNormalBuffers, surfaceIndicesBuffers);
+      gl.disable(gl.DEPTH_TEST);
+      if (gaussianSurfaces.length > 0)
+      {
+	  this.drawGaussianSurfaces(gl,              surfaceProgram, projectionMatrix,
+                                  modelViewMatrix, normalMatrix,   gaussianSurfaces);
+      }
+      gl.enable(gl.DEPTH_TEST);
       gl.disable(gl.BLEND);
       gl.disable(gl.CULL_FACE);
     }
@@ -416,8 +452,6 @@ function fieldRenderer(drawingSurface_)
   this.initialRender = function()
   {
     var arrows;
-    /** Geometry holder for a surface, including vertices, normales and indices. */
-    var geometry;
     var line;
     var maxPoints;
     var nfluxLines;
@@ -443,7 +477,7 @@ function fieldRenderer(drawingSurface_)
     points               = new Float32Array(3*maxPoints);
     nfluxLines           = startPoints.length;
                 
-    line                 = new fluxLine(charges);
+    line                 = new fluxLine(charges, chargeDistributions);
     line.setMaxPoints(5000);
     line.setDs(.3);
     line.setArrowSpacing(50);
@@ -465,26 +499,27 @@ function fieldRenderer(drawingSurface_)
       startPoint[5]           = line.getNarrows();
     }
 
-    if (gaussianSurfaces.length > 0)
+
+    if (gaussianSurfaces.length > 0 || chargeDistributions.length > 0)
     {
       surfaceProgram = this.createSurfaceProgram(gl);
-      geometry       = new surfaceGeometry(6*31*31);
-      for (var i=0; i<gaussianSurfaces.length; i++)
-      {
-        gaussianSurfaces[i].computeSurface(geometry);
-        surfaceGeometryBuffers[i] = createBuffer(gl, geometry.getVertices());
-        surfaceNormalBuffers[i]   = createBuffer(gl, geometry.getNormals());
-        surfaceIndicesBuffers[i]  = createIndexBuffer(gl, geometry.getIndices());
-      }
     }
+
+    initialized = true;
 
     this.render();
   }
 
+  this.start = function()
+  {
+    latch.countDown();
+  }
+
+
             
   // Allows initialRenderer to be invoked in the context of this.
   // https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function/bind
-  var latch = new countdownLatch(2, this.initialRender.bind(this));
+  latch = new countdownLatch(3, this.initialRender.bind(this));
 
   gl                       = getGLContext(drawingSurface);
 
