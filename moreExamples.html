@@ -2,15 +2,16 @@
 <html>
   <head>
     <title>Visualizing an Electric Field With HTML5 and WebGL, Part 5: More Examples</title>
-    <link   rel="stylesheet"       href="css/estyle.css" type="text/css">
-    <link   rel="prev"             href="examples.html">
-    <script type="text/javascript" src="js/motionEventHandler.js"></script>
-    <script type="text/javascript" src="js/WebGL.js"></script>
-    <script type="text/javascript" src="js/geometry.js"></script>
-    <script type="text/javascript" src="js/charges.js"></script>
-    <script type="text/javascript" src="js/gaussianSphere.js"></script>
-    <script type="text/javascript" src="js/chargedSphere.js"></script>
-    <script type="text/javascript" src="js/efield.js"></script>
+    <meta   http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <link   rel="stylesheet"          href="css/nstyle.css" type="text/css">
+    <link   rel="prev"                href="examples.html">
+    <script type="text/javascript"    src="js/motionEventHandler.js"></script>
+    <script type="text/javascript"    src="js/WebGL.js"></script>
+    <script type="text/javascript"    src="js/geometry.js"></script>
+    <script type="text/javascript"    src="js/charges.js"></script>
+    <script type="text/javascript"    src="js/gaussianSphere.js"></script>
+    <script type="text/javascript"    src="js/chargedSphere.js"></script>
+    <script type="text/javascript"    src="js/efield.js"></script>
     <script type="text/javascript"
             src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
     </script>
@@ -29,26 +30,20 @@
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
      See the License for the specific language governing permissions and
      limitations under the License. -->
-  <div id="left">
-    <div id="topLeft">
-      <div id="topLeftContent">
-        Visualization<br>
-        Instruction<br>
-        Technology<br>
-      </div>
-    </div>
-    <div id="lowerLeft">
-      Education
-    </div>
-  </div>
-  <div id="right">
-    <div id="top">
-      <a href = "http://www.vizitsolutions.com"><img id="logo" src="images/VizITLogo.png" alt="VizIT Solutions"></a>
-    </div>
+    <div class="wrapper">
     <div id="main">
+      <div id="header">
+        <span class="logo2 Fell"><a href = "http://www.vizitsolutions.com/">Vizit Solutions</a></span>
+        <ul>
+          <li><a href="http://www.vizitsolutions.com/portfolio/catalog/" title="Catalog">Catalog</a></li>
+          <li><a href="http://www.vizitsolutions.com/portfolio/" title="Portfolio">Portfolio</a></li>
+          <li><a href="http://blog.vizitsolutions.com/" title="Blog">Blog</a></li>
+          <li><a href="mailto:akluge@vizitsolutions.com?subject=Visualization" title="akluge@vizitsolutions.com">Contact</a></li>
+        </ul>
+      </div>
     <div class="content">
       <h1>Visualizing an Electric Field With HTML5 and WebGL, Part 5: More Examples</h1>
-      <p id="nowebgl" class="error"><p>
+      <p id="nowebgl" class="error"></p>
       <p class="abstract">
         &nbsp;
       </p>
@@ -61,8 +56,8 @@
 
       <figure class="right">
         <!--A blank area we can draw on with JavaScript. -->
-        <canvas id="drawingSurfaceI" width="300px" height="300px"></canvas>
-        <figcaption>A spherical charge distribution of radius 30.</figcaption>
+        <canvas id="drawingSurfaceI" width="300" height="300"></canvas>
+        <figcaption>A spherical charge distribution of radius 50.</figcaption>
       </figure>
 
       <h4>The Canvas</h4>
@@ -74,7 +69,7 @@
 <pre>
         &lt;figure class="right"&gt;
           &lt;!--A blank area we can draw on with JavaScript. --&gt;
-          &lt;canvas id="drawingSurfaceI" width="300px" height="300px"&gt;&lt;/canvas&gt;
+          &lt;canvas id="drawingSurfaceI" width="300" height="300"&gt;&lt;/canvas&gt;
           &lt;figcaption&gt;A spherical charge distribution of radius 30.&lt;/figcaption&gt;
         &lt;/figure&gt;
 </pre>
@@ -184,7 +179,7 @@
 
         <figure class="right">
           <!--A blank area we can draw on with JavaScript. -->
-          <canvas id="drawingSurfaceII" width="300px" height="300px"></canvas>
+          <canvas id="drawingSurfaceII" width="300" height="300"></canvas>
           <figcaption>A charge distribution surrounding a Gaussian surface.</figcaption>
         </figure>
 
@@ -195,7 +190,7 @@
 <pre>
         &lt;figure class="right"&gt
           &lt;!--A blank area we can draw on with JavaScript. --&gt
-          &lt;canvas id="drawingSurfaceII" width="300px" height="300px"&gt&lt;/canvas&gt
+          &lt;canvas id="drawingSurfaceII" width="300" height="300"&gt&lt;/canvas&gt
           &lt;figcaption&gtA charge distribution surrounding a Gaussian surface.&lt;/figcaption&gt
         &lt;/figure&gt
 </pre>
@@ -271,12 +266,12 @@
        embedded within the charge distribution with radius r and a&lt;r&lt;b.
       </p>
   
-        <br clear="all" />
+        <br class="clear">
 
-        <hr />
+        <hr>
         <span class="floatleft">Previous: <a href = "examples.html">Examples</a></span>
-        <br clear="all" />
-        <hr />
+        <br class="clear">
+        <hr>
     </div>
     </div>
   </div>

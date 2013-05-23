@@ -1,8 +1,14 @@
 "use strict";
-/*
- * startPoints: User defined start points for each flux line
+/**
+ * JavaScript object for rendering charges and their associated field
+ * lines.
+ *
+ * @param {HTMLCanvasElement} drawingSurface_ An HTML canvas into which we will render the model.
+ * @param {string}            [home_ = .]     A string giving the path to the efield home directory if not the directory the page is loaded from.
+ *
+ * @constructor
  */
-function fieldRenderer(drawingSurface_)
+function fieldRenderer(drawingSurface_, home_)
 {
   /** Global variables within this field renderer. */
 
@@ -38,6 +44,7 @@ function fieldRenderer(drawingSurface_)
   var modelViewMatrix;
   var normalMatrix;
   var eventHandler;
+  var home;
   var negativeChargeIndex;
   // Texture (image) used to represent a negative charge.
   var negativeChargeTexture;
@@ -58,6 +65,8 @@ function fieldRenderer(drawingSurface_)
   charges                = new Charges();
   drawingSurface         = drawingSurface_;
   gaussianSurfaces       = new Array();
+  // Use ./ if home_ is undefined
+  home                   = typeof home_ == 'undefined' ? "./" : home_;
   initialized            = false;
   startPoints            = new Array();
   vertexRegistry         = new GeometryEngine.VertexRegistry();
@@ -86,6 +95,11 @@ function fieldRenderer(drawingSurface_)
   {
     charges.addCharge(charge_);
     return this;
+  }
+
+  this.getContext            = function()
+  {
+    return gl;
   }
 
   this.createSurfaceProgram  = function(gl)
@@ -186,7 +200,7 @@ function fieldRenderer(drawingSurface_)
   {
     var chargeProgram;
     // gl_PointSize causes each point to be rendered as an nxn texture.
-    var vertexShaderSource   =   "precision highp float;"
+    var vertexShaderSource   = "precision highp float;"
                                + "attribute vec3  position;"
                                + "attribute float charge;"
                                + "varying   float vCharge;"
@@ -449,6 +463,58 @@ function fieldRenderer(drawingSurface_)
     this.render();
   }
 
+  this.allocateStorage = function()
+  {
+    var bytes = 1024*1024*1024*2;
+    window.webkitStorageInfo.requestQuota(PERSISTENT, bytes, function(grantedBytes)
+                                                             {
+                                                               console.log('Got storage', grantedBytes);
+                                                               window.webkitRequestFileSystem(PERSISTENT, grantedBytes, function (fs)
+                                                                                                                        {
+                                                                                                                          window.fs = fs;
+                                                                                                                          console.log("Got filesystem");
+                                                                                                                        });
+                                                             }, function(e)
+                                                                {
+                                                                  console.log('Storage error', e);
+                                                                });
+  }
+
+this.capture    = function(canvas)
+{
+  var name = Math.random(); // File name doesn't matter
+  var image = canvas.toDataURL('image/png').slice(22);
+  window.fs.root.getFile(name, {create: true}, function (entry)
+                                               {
+                                                 entry.createWriter(function (writer)
+                                                 {
+                                                   // Convert base64 to binary without UTF-8 mangling.
+                                                   var data = atob(image);
+                                                   var buf = new Uint8Array(data.length);
+                                                   for (var i = 0; i < data.length; ++i)
+                                                   {
+                                                     buf[i] = data.charCodeAt(i);
+                                                    }
+
+                                                   // Write data
+                                                   var blob = new Blob([buf], {});
+                                                   writer.seek(0);
+                                                   writer.write(blob);
+  
+                                                   console.log('Writing file', frames, blob.size);
+
+                                                 });
+                                               }, function () { console.log('File error', arguments); });
+ }
+
+ this.pausecomp = function(millis)
+ {
+  var date = new Date();
+  var curDate = null;
+  do { curDate = new Date(); }
+  while(curDate-date < millis);
+}
+
   this.initialRender = function()
   {
     var arrows;
@@ -508,6 +574,17 @@ function fieldRenderer(drawingSurface_)
     initialized = true;
 
     this.render();
+    /*
+    this.allocateStorage();
+    this.capture(drawingSurface);
+    */
+    //this.pausecomp(2000);
+    //var data = drawingSurface.toDataURL("image/png").replace("image/png", "image/octet-stream");
+    //window.location.href = data;
+    /*    var name = Math.random();
+    drawingSurface.toDataURL();toBlob(function(blob) {
+      saveAs(blob, "efield" + name);
+      });*/
   }
 
   this.start = function()
@@ -523,27 +600,30 @@ function fieldRenderer(drawingSurface_)
 
   gl                       = getGLContext(drawingSurface);
 
-  negativeChargeIndex      = 0;
-  negativeChargeTexture    = loadTexture(gl, "images/negativeCharge.png", negativeChargeIndex, latch.countDown);
-  positiveChargeIndex      = 1;
-  positiveChargeTexture    = loadTexture(gl, "images/positiveCharge.png", positiveChargeIndex, latch.countDown);
+  if (gl)
+  {
+    negativeChargeIndex      = 0;
+    negativeChargeTexture    = loadTexture(gl, home + "images/negativeCharge.png", negativeChargeIndex, latch.countDown);
+    positiveChargeIndex      = 1;
+    positiveChargeTexture    = loadTexture(gl, home + "images/positiveCharge.png", positiveChargeIndex, latch.countDown);
             
-  // Initially an identity matrix, modified by movementEventHandler.
-  modelViewMatrix = new Float32Array([1, 0, 0, 0,
-                                      0, 1, 0, 0,
-                                      0, 0, 1, 0,
-                                      0, 0, 0, 1]);
+    // Initially an identity matrix, modified by movementEventHandler.
+    modelViewMatrix = new Float32Array([1, 0, 0, 0,
+                                        0, 1, 0, 0,
+                                        0, 0, 1, 0,
+                                        0, 0, 0, 1]);
 
-  normalMatrix    = new Float32Array([1, 0, 0,
-                                      0, 1, 0,
-                                      0, 0, 1]);
+    normalMatrix    = new Float32Array([1, 0, 0,
+                                        0, 1, 0,
+                                        0, 0, 1]);
 
-  eventHandler             = new motionEventHandler(this);
-  drawingSurface.addEventListener("mousewheel", eventHandler.handleMouseWheel.bind(eventHandler), false);
-  drawingSurface.addEventListener("mousedown",  eventHandler.handleMouseDown.bind(eventHandler),  false);
-  document.addEventListener("mouseup",          eventHandler.handleMouseUp.bind(eventHandler),    false);
-  document.addEventListener("mousemove",        eventHandler.handleMouseMove.bind(eventHandler),  false);
-  drawingSurface.addEventListener("touchstart", eventHandler.handleTouchStart.bind(eventHandler), false);
-  drawingSurface.addEventListener("touchmove",  eventHandler.handleTouchMove.bind(eventHandler),  false);
-  drawingSurface.addEventListener("touchend",   eventHandler.handleTouchEnd.bind(eventHandler),   false);
+    eventHandler             = new motionEventHandler(this);
+    drawingSurface.addEventListener("mousewheel", eventHandler.handleMouseWheel.bind(eventHandler), false);
+    drawingSurface.addEventListener("mousedown",  eventHandler.handleMouseDown.bind(eventHandler),  false);
+    document.addEventListener("mouseup",          eventHandler.handleMouseUp.bind(eventHandler),    false);
+    document.addEventListener("mousemove",        eventHandler.handleMouseMove.bind(eventHandler),  false);
+    drawingSurface.addEventListener("touchstart", eventHandler.handleTouchStart.bind(eventHandler), false);
+    drawingSurface.addEventListener("touchmove",  eventHandler.handleTouchMove.bind(eventHandler),  false);
+    drawingSurface.addEventListener("touchend",   eventHandler.handleTouchEnd.bind(eventHandler),   false);
+  }
 }

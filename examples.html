@@ -2,16 +2,17 @@
 <html>
   <head>
     <title>Visualizing an Electric Field With HTML5 and WebGL, Part 4: Code Examples</title>
-    <link   rel="stylesheet"       href="css/estyle.css" type="text/css">
-    <link   rel="prev"             href="chargedDistributions.html">
-    <link   rel="next"             href="moreExamples.html">
-    <script type="text/javascript" src="js/motionEventHandler.js"></script>
-    <script type="text/javascript" src="js/WebGL.js"></script>
-    <script type="text/javascript" src="js/geometry.js"></script>
-    <script type="text/javascript" src="js/charges.js"></script>
-    <script type="text/javascript" src="js/gaussianSphere.js"></script>
-    <script type="text/javascript" src="js/chargedSphere.js"></script>
-    <script type="text/javascript" src="js/efield.js"></script>
+    <meta   http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <link   rel="stylesheet"          href="css/nstyle.css" type="text/css">
+    <link   rel="prev"                href="chargedDistributions.html">
+    <link   rel="next"                href="moreExamples.html">
+    <script type="text/javascript"    src="js/motionEventHandler.js"></script>
+    <script type="text/javascript"    src="js/WebGL.js"></script>
+    <script type="text/javascript"    src="js/geometry.js"></script>
+    <script type="text/javascript"    src="js/charges.js"></script>
+    <script type="text/javascript"    src="js/gaussianSphere.js"></script>
+    <script type="text/javascript"    src="js/chargedSphere.js"></script>
+    <script type="text/javascript"    src="js/efield.js"></script>
     <script type="text/javascript"
             src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
     </script>
@@ -30,26 +31,20 @@
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
      See the License for the specific language governing permissions and
      limitations under the License. -->
-  <div id="left">
-    <div id="topLeft">
-      <div id="topLeftContent">
-        Visualization<br>
-        Instruction<br>
-        Technology<br>
-      </div>
-    </div>
-    <div id="lowerLeft">
-      Education
-    </div>
-  </div>
-  <div id="right">
-    <div id="top">
-      <a href = "http://www.vizitsolutions.com"><img id="logo" src="images/VizITLogo.png" alt="VizIT Solutions"></a>
-    </div>
+    <div class="wrapper">
     <div id="main">
+      <div id="header">
+        <span class="logo2 Fell"><a href = "http://www.vizitsolutions.com/">Vizit Solutions</a></span>
+        <ul>
+          <li><a href="http://www.vizitsolutions.com/portfolio/catalog/" title="Catalog">Catalog</a></li>
+          <li><a href="http://www.vizitsolutions.com/portfolio/" title="Portfolio">Portfolio</a></li>
+          <li><a href="http://blog.vizitsolutions.com/" title="Blog">Blog</a></li>
+          <li><a href="mailto:akluge@vizitsolutions.com?subject=Visualization" title="akluge@vizitsolutions.com">Contact</a></li>
+        </ul>
+      </div>
     <div class="content">
       <h1>Visualizing an Electric Field With HTML5 and WebGL, Part 4: Code Examples</h1>
-      <p id="nowebgl" class="error"><p>
+      <p id="nowebgl" class="error"></p>
       <p class="abstract">
         &nbsp;This library provides an easy to use method for generating physically correct
         and instructionally relevant visualizations in electrostatics.
@@ -70,19 +65,19 @@
       </p>
 
 <pre>
-    &lt;script type="text/javascript" src="motionEventHandler.js"&gt;&lt;/script&gt;
-    &lt;script type="text/javascript" src="WebGL.js"&gt;&lt;/script&gt;
-    &lt;script type="text/javascript" src="geometry.js"&gt;&lt;/script&gt;
-    &lt;script type="text/javascript" src="charges.js"&gt;&lt;/script&gt;
-    &lt;script type="text/javascript" src="gaussianSphere.js"&gt;&lt;/script&gt;
-    &lt;script type="text/javascript" src="chargedSphere.js"&gt;&lt;/script&gt;
-    &lt;script type="text/javascript" src="efield.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="js/motionEventHandler.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="js/WebGL.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="js/geometry.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="js/charges.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="js/gaussianSphere.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="js/chargedSphere.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="js/efield.js"&gt;&lt;/script&gt;
 </pre>
 
 
       <figure class="right">
         <!--A blank area we can draw on with JavaScript. -->
-        <canvas id="drawingSurface" width="300px" height="300px"></canvas>
+        <canvas id="drawingSurface" width="300" height="300"></canvas>
         <figcaption>How do we draw a charge at the origin?</figcaption>
       </figure>
 
@@ -97,7 +92,7 @@
       </p>
 <pre>
     &lt;!--A blank area we can draw on with JavaScript. --&gt;
-    &lt;canvas id="drawingSurface" width="300px" height="300px"&gt;&lt;/canvas&gt;
+    &lt;canvas id="drawingSurface" width="300" height="300"&gt;&lt;/canvas&gt;
 </pre>
       <h4>The Charge</h4>
       <p>
@@ -202,7 +197,7 @@
 
         <figure class="right">
           <!--A blank area we can draw on with JavaScript. -->
-          <canvas id="anotherDrawingSurface" width="300px" height="300px"></canvas>
+          <canvas id="anotherDrawingSurface" width="300" height="300"></canvas>
           <figcaption>Now we see how easy it is to draw the dipole.</figcaption>
         </figure>
 
@@ -212,7 +207,7 @@
         to give it a unique id.
       </p>
 <pre>
-    &lt;canvas id="anotherDrawingSurface" width="300px" height="300px"&gt;&lt;/canvas&gt;
+    &lt;canvas id="anotherDrawingSurface" width="300" height="300"&gt;&lt;/canvas&gt;
 </pre>
     <h4>Defining Two Charges</h4>
     <p>
@@ -312,8 +307,8 @@
       </p>
       <figure class="right">
         <!--A blank area we can draw on with JavaScript. -->
-        <canvas id="yetAnotherDrawingSurface" width="300px" height="300px"></canvas>
-        <figcaption>A classic Gaussian surface example. The fields lines radiate<br />
+        <canvas id="yetAnotherDrawingSurface" width="300" height="300"></canvas>
+        <figcaption>A classic Gaussian surface example. The fields lines radiate<br>
                     out from the charge and cross the Gaussian sphere.</figcaption>
       </figure>
 
@@ -322,7 +317,7 @@
         As always, start by defining a drawing surface.
       </p>
 <pre>
-    &lt;canvas id="yetAnotherDrawingSurface" width="300px" height="300px"&gt;&lt;/canvas&gt;
+    &lt;canvas id="yetAnotherDrawingSurface" width="300" height="300"&gt;&lt;/canvas&gt;
 </pre>
       <h4>Yet Another fieldRenderer</h4>
         <p>
@@ -330,7 +325,7 @@
          add a Gaussian surface, a sphere centered at the origin and with a radius of 40.
         </p>
 <!-- Prevent overlap of the preformatted code and the figure -->
-<br clear="all" />
+<br class="clear">
 <pre>
     var gaussianSurface;
 
@@ -345,18 +340,18 @@
         <p>
         </p>
 
-        <br clear="all" />
+        <br class="clear">
 
         <div class="footnote">
         1) In the near future even this step will be greatly simplified with the
            automatic placement of field lines proportional to field strength.
         </div>
 
-        <hr />
+        <hr>
         <span class="floatleft">Previous: <a href = "chargedDistributions.html">Charge Distributions</a></span>
         <span class="floatright">Next: <a href = "moreExamples.html">More Examples</a></span>
-        <br clear="all" />
-        <hr />
+        <br class="clear">
+        <hr>
     </div>
     </div>
   </div>
