@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Visualizing an Electric Field With HTML5 and WebGL, Part 5: More Examples</title>
+    <title>Visualizing an Electric Field With HTML5 and WebGL, Part 6: More Examples</title>
     <meta   http-equiv="Content-Type" content="text/html;charset=utf-8" >
     <link   rel="stylesheet"          href="css/nstyle.css" type="text/css">
+    <link   rel="next"                href="chargedPlaneExamples.html">
     <link   rel="prev"                href="examples.html">
     <script type="text/javascript"    src="js/motionEventHandler.js"></script>
     <script type="text/javascript"    src="js/WebGL.js"></script>
@@ -35,14 +36,14 @@
       <div id="header">
         <span class="logo2 Fell"><a href = "http://www.vizitsolutions.com/">Vizit Solutions</a></span>
         <ul>
-          <li><a href="http://www.vizitsolutions.com/portfolio/catalog/" title="Catalog">Catalog</a></li>
-          <li><a href="http://www.vizitsolutions.com/portfolio/" title="Portfolio">Portfolio</a></li>
+          <li><a href="../catalog/" title="Catalog">Catalog</a></li>
+          <li><a href="../" title="Portfolio">Portfolio</a></li>
           <li><a href="http://blog.vizitsolutions.com/" title="Blog">Blog</a></li>
           <li><a href="mailto:akluge@vizitsolutions.com?subject=Visualization" title="akluge@vizitsolutions.com">Contact</a></li>
         </ul>
       </div>
     <div class="content">
-      <h1>Visualizing an Electric Field With HTML5 and WebGL, Part 5: More Examples</h1>
+      <h1>Visualizing an Electric Field With HTML5 and WebGL, Part 6: More Examples</h1>
       <p id="nowebgl" class="error"></p>
       <p class="abstract">
         &nbsp;
@@ -78,9 +79,10 @@
       <h4>The Charge Distribution</h4>
       <p>
         A spherical charge distribution of charge Q inner radius a and outer
-       radius b at centered at (x,y,z) is defined with:
+       radius b at centered at (x,y,z) with rho field lines per unit charge
+       is defined with:
 <pre>
-  new chargedSphere( Q, x, y, z, a, b);
+  new chargedSphere(Q, rho, x, y, z, a, b);
 </pre>
        Additional shapes will be added over time.
       </p>
@@ -91,7 +93,7 @@
 <pre>
     var chargeDistribution;
 
-    chargeDistribution = new chargedSphere( -1.0, 0.0, 0.0, 0.0, 0.0, 50.0);
+    chargeDistribution = new chargedSphere( -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 50.0);
 </pre>
 
       <h4>Field Lines</h4>
@@ -162,7 +164,7 @@
     drawingSurface     = document.getElementById('drawingSurfaceI');
     renderer           = new fieldRenderer(drawingSurface);
     renderer           = placeStartPoints(renderer);
-    chargeDistribution = new chargedSphere( -1.0, 0.0, 0.0, 0.0, 0.0, 50.0);
+    chargeDistribution = new chargedSphere( -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 50.0);
     renderer           = renderer.addChargeDistribution(chargeDistribution);
     renderer.start();
 </pre>
@@ -172,7 +174,7 @@
         Combining these building blocks in innovative ways can generate sophisticated
        examples. For example, we can place a Gaussian surface within a hollow spherical
        charge distribution. Zooming in allows you to see that the Gaussian surface is
-       within the inner radius of the charge distribution, and tha the field lines
+       within the inner radius of the charge distribution, and that the field lines
        begin within the charge distribution, and so do not impinge on the Gaussian
        surface.
       </p>
@@ -203,7 +205,7 @@
 <pre>
     var chargeDistribution;
 
-    chargeDistribution = new chargedSphere( -1.0, 0.0, 0.0, 0.0, 20.0, 50.0);
+    chargeDistribution = new chargedSphere( -1.0, 0.0, 0.0, 0.0, 0.0, 20.0, 50.0);
 </pre>
 
    <h4>The Gaussian Surface</h4>
@@ -221,7 +223,7 @@
   <h4>More Field Lines</h4>
   <p>
     The start point for each field line lies on a sphere of radius 21.
-   They will start just inside of the charge dustribution, and well
+   They will start just inside of the charge distribution, and well
    outside of the Gaussian sphere.
   </p>
 <pre>
@@ -255,7 +257,7 @@
     renderer           = placeMoreStartPoints(renderer);
     gaussianSurface    = new gaussianSphere(0.0, 0.0, 0.0, 10.0);
     renderer           = renderer.addGaussianSurface(gaussianSurface);
-    chargeDistribution = new chargedSphere( -1.0, 0.0, 0.0, 0.0, 20.0, 50.0);
+    chargeDistribution = new chargedSphere( -1.0, 0.0, 0.0, 0.0, 0.0, 20.0, 50.0);
     renderer           = renderer.addChargeDistribution(chargeDistribution);
     renderer.start();
 </pre>
@@ -270,6 +272,7 @@
 
         <hr>
         <span class="floatleft">Previous: <a href = "examples.html">Examples</a></span>
+        <span class="floatright">Next: <a href = "chargedPlaneExamples.html">Charged Plane Examples</a></span>
         <br class="clear">
         <hr>
     </div>
@@ -332,7 +335,7 @@
     drawingSurface     = document.getElementById('drawingSurfaceI');
     renderer           = new fieldRenderer(drawingSurface);
     renderer           = placeStartPoints(renderer);
-    chargeDistribution = new chargedSphere( -1.0, 0.0, 0.0, 0.0, 0.0, 50.0);
+    chargeDistribution = new chargedSphere( -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 50.0);
     renderer           = renderer.addChargeDistribution(chargeDistribution);
     renderer.start();
 
@@ -341,7 +344,7 @@
     renderer           = placeMoreStartPoints(renderer);
     gaussianSurface    = new gaussianSphere(0.0, 0.0, 0.0, 10.0);
     renderer           = renderer.addGaussianSurface(gaussianSurface);
-    chargeDistribution = new chargedSphere( -1.0, 0.0, 0.0, 0.0, 20.0, 50.0);
+    chargeDistribution = new chargedSphere( -1.0, 0.0, 0.0, 0.0, 0.0, 20.0, 50.0);
     renderer           = renderer.addChargeDistribution(chargeDistribution);
     renderer.start();
 

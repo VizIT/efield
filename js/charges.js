@@ -1,3 +1,4 @@
+"use strict";
 /**
  * Represents a single charge in a set of charges
  * A charge has position and a charge in nano-Columbs.
@@ -22,7 +23,7 @@ function Charge(Q_, x_, y_, z_)
       return position;
     }
 
-    this.getField    = function(x, y, z)
+    this.getField           = function(x, y, z)
     {
       var deltaX;
       var deltaY;
@@ -52,6 +53,79 @@ function Charge(Q_, x_, y_, z_)
       field[2]    = f * deltaZ / r;
 
       return field;
+    }
+
+    /**
+     * Compute the start points for field lines due to the presence of this charge.
+     * 
+     * @param {Integer} pho The densiy of field lines per unit charge.
+     */
+    this.getFieldSeedPointsI = function(rho)
+    {
+      var increment;
+      var nlines;
+      var offset;
+      var phi;
+      var r;
+      var seedPoints;
+      var sgn;
+      var y;
+
+      increment  = 2.39996323 //Math.PI * (3- Math.sqrt(5))
+      seedPoints = new Array();
+      sgn        = Q > 0 ? 1 : Q < 0 ? -1 : 0;
+      nlines     = Math.round(rho * Q * sgn);
+      offset     = 2/nlines;
+
+
+      for (var i = 0; i< nlines; i++)
+      {
+        y   = i * offset - 1 + (offset / 2);
+        r   = Math.sqrt(1 - y*y);
+        phi = i * increment;
+        seedPoints.push(new Array(Math.cos(phi)*r + position[0],
+                                  y               + position[1],
+                                  Math.sin(phi)*r + position[2],
+                                  sgn));
+      }
+      return seedPoints;
+    }
+
+    /**
+     * Compute the start points for field lines due to the presence of this charge.
+     * 
+     * @param {Integer} pho The densiy of field lines per unit charge.
+     */
+    this.getStartPoints = function(rho)
+    {
+      var nlines;
+      var phi;
+      var r;
+      var s;
+      var seedPoints;
+      var sgn;
+      var y;
+
+      sgn        = Q > 0 ? 1 : Q < 0 ? -1 : 0;
+      nlines     = Math.round(rho * Q * sgn);
+      s          = 3.6 / Math.sqrt(nlines);
+      phi        = Math.random() * Math.PI / 2;
+      seedPoints = new Array();
+
+      seedPoints.push(new Array(0, -1, 0, sgn));
+      for (var i=1; i<nlines; i++)
+      {
+        y   = -1 + 2 * i / (nlines-1);
+        r   = Math.sqrt(1 - y*y);
+        phi = phi + s / r;
+        seedPoints.push(new Array(Math.cos(phi)*r + position[0],
+                                  y               + position[1],
+                                  Math.sin(phi)*r + position[2],
+                                  sgn));
+      }
+      seedPoints.push(new Array(0, 1, 0, sgn));
+
+      return seedPoints;
     }
 }
 

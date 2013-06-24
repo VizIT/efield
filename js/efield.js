@@ -26,6 +26,7 @@ function fieldRenderer(drawingSurface_, home_)
   // vertex array buffer for a sharde.
   var charges32Array;
   var drawingSurface;
+  var explicitStartPoints;
   // Vertex buffer for flux directional arrows
   var fluxDirectionBuffers;
   // The flux lines as loaded into the graphics card as a vertex array buffer.
@@ -53,6 +54,8 @@ function fieldRenderer(drawingSurface_, home_)
   // Texture (image) used to represent a posative charge.
   var positiveChargeTexture;
   var projectionMatrix;
+  // The density of field lines per unit charge.
+  var rho;
   // Scale sets the bounds used in the projection matrix.
   var scale;
   // Start points for tracing field lines
@@ -64,11 +67,15 @@ function fieldRenderer(drawingSurface_, home_)
   chargeDistributions    = new Array();
   charges                = new Charges();
   drawingSurface         = drawingSurface_;
+  explicitStartPoints    = new Array();
   gaussianSurfaces       = new Array();
   // Use ./ if home_ is undefined
   home                   = typeof home_ == 'undefined' ? "./" : home_;
   initialized            = false;
-  startPoints            = new Array();
+  // no auto generated field lines for now.
+  rho                    = 0;
+  // Will be different from startPoints if rho is non zero.
+  startPoints            = explicitStartPoints;
   vertexRegistry         = new GeometryEngine.VertexRegistry();
 
   this.addGaussianSurface    = function(surface)
@@ -87,7 +94,7 @@ function fieldRenderer(drawingSurface_, home_)
 
   this.addStartPoint         = function(x_, y_, z_, sgn_)
   {
-    startPoints.push(new Array(x_, y_, z_, sgn_));
+    explicitStartPoints.push(new Array(x_, y_, z_, sgn_));
     return this;
   }
 
@@ -518,8 +525,11 @@ this.capture    = function(canvas)
   this.initialRender = function()
   {
     var arrows;
+    var chargeArray;
     var line;
     var maxPoints;
+    var newStartPoints;
+    var ncharges;
     var nfluxLines;
     var points;
     var startPoint;
@@ -538,6 +548,29 @@ this.capture    = function(canvas)
 
     fluxLineBuffers      = new Array();
     fluxDirectionBuffers = new Array();
+
+    startPoints          = explicitStartPoints;
+
+
+    ncharges = chargeDistributions.length;
+    for(var i=0; i<ncharges; i++)
+    {
+      newStartPoints = chargeDistributions[i].getStartPoints();
+      startPoints    = startPoints.concat(newStartPoints);
+    }
+
+    // Load start points from implicit defenition if any
+    if (rho > 0)
+    {
+      chargeArray = charges.getCharges();
+      ncharges    = chargeArray.length;
+
+      for(var i=0; i<ncharges; i++)
+      {
+        newStartPoints = chargeArray[i].getStartPoints(rho);
+        startPoints    = startPoints.concat(newStartPoints);
+      }
+    }
 
     // WebGL reads vertices directly from a Float32Array
     points               = new Float32Array(3*maxPoints);
@@ -564,7 +597,6 @@ this.capture    = function(canvas)
       fluxDirectionBuffers[i] = createBuffer(gl, line.getArrows());
       startPoint[5]           = line.getNarrows();
     }
-
 
     if (gaussianSurfaces.length > 0 || chargeDistributions.length > 0)
     {

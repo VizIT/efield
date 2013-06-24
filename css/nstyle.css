@@ -261,6 +261,11 @@ div.codeExample
    overflow:          auto;
 }
 
+.largeCode
+{
+  overflow-x:         scroll;
+}
+
 div#left
 {
   position:      absolute;

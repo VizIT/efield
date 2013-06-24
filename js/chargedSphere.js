@@ -4,9 +4,16 @@
  * inner radius a and outer radius b. a may be zero indicating
  * a solid sphere.
  *
- * 
+ * @constructor	
+ * @param {number} Q_   The total charge contained in this distribution.
+ * @param {number} rho_ The density of field lines in lines per unit charge.
+ * @param {number} x_   The x coordinate of the center of the sphere.
+ * @param {number} y_   The y coordinate of the center of the sphere.
+ * @param {number} z_   The z coordinate of the center of the sphere.
+ * @param {number} a_   The inner radius of the distribution. 0 for a solid sphere.
+ * @param {number} b_   The outer radius of the distribution.
  */
-function chargedSphere(Q_, x_, y_, z_, a_, b_)
+function chargedSphere(Q_, rho_, x_, y_, z_, a_, b_)
 {
   var a;
   var a2;
@@ -17,6 +24,7 @@ function chargedSphere(Q_, x_, y_, z_, a_, b_)
   var nindices;
   var pi;
   var Q;
+  var rho;
   var vertexRegistry;
   var x0;
   var y0;
@@ -31,6 +39,7 @@ function chargedSphere(Q_, x_, y_, z_, a_, b_)
   b      = b_;
   b3     = b*b*b;
   Q      = Q_;
+  rho    = rho_;
   x0     = x_;
   y0     = y_;
   z0     = z_;
@@ -71,6 +80,42 @@ function chargedSphere(Q_, x_, y_, z_, a_, b_)
   this.getVertexRegistry   = function()
   {
     return vertexRegistry;
+  }
+
+  /**
+   * Compute the start points for field lines due to the presence of this charge.
+   * 
+   * TODO: make the start point distribution vary with r as the charge.
+   * TODO: use a better distribution - this spiral is not so good to illustrate physics.
+   */
+  this.getStartPoints = function()
+  {
+    var nlines;
+    var phi;
+    var r;
+    var s;
+    var seedPoints;
+    var sgn;
+    var y;
+
+    sgn        = Q > 0 ? 1 : Q < 0 ? -1 : 0;
+    nlines     = Math.round(rho * Q * sgn);
+    s          = 4*a / Math.sqrt(nlines);
+    phi        = 0; // Or inject variablility with: Math.random() * Math.PI / 2;
+    seedPoints = new Array();
+
+    for (var i=0; i<nlines; i++)
+    {
+      y   = (-1 + 2 * i / (nlines-1)) * a;
+      r   = Math.sqrt(a*a - y*y) + .2*(b-a);
+      phi = phi + s / r;
+      seedPoints.push(new Array(Math.cos(phi)*r + x0,
+                                y               + y0,
+                                Math.sin(phi)*r + z0,
+                                sgn));
+    }
+
+    return seedPoints;
   }
 
   /**
@@ -169,11 +214,11 @@ function chargedSphere(Q_, x_, y_, z_, a_, b_)
     var intrinsicRadius;
     var r;
     var scale;
-    var verticies;
+    var vertices;
 
     // This is the actual sized used in the default spherical geometry.
     intrinsicRadius = this.getIntrinsicRadius();
-    verticies       = this.getVertexBuffers(gl, vertexRegistry);
+    vertices       = this.getVertexBuffers(gl, vertexRegistry);
 
     // RGBA positive (blue) or negative (red) charge
     if (Q > 0)
@@ -196,16 +241,16 @@ function chargedSphere(Q_, x_, y_, z_, a_, b_)
     {
       scale =r/intrinsicRadius;
       loadUniformMatrix4fv(gl, surfaceProgram, "modelViewMatrix", this.getModelView(scale));
-      this.drawFullSurface(gl,                surfaceProgram,    verticies.verticies, verticies.normals,
-                           verticies.indices, nindices);
+      this.drawFullSurface(gl,               surfaceProgram,   vertices.vertices,
+                           vertices.normals, vertices.indices, nindices);
     }
     
     gl.cullFace(gl.BACK);
     for(r=a; r<=b; r++)
     {
       scale =r/intrinsicRadius;
-      this.drawFullSurface(gl,                surfaceProgram,    verticies.verticies, verticies.normals,
-                           verticies.indices, nindices);
+      this.drawFullSurface(gl,                surfaceProgram,   vertices.vertices,
+                            vertices.normals, vertices.indices, nindices);
       loadUniformMatrix4fv(gl, surfaceProgram, "modelViewMatrix", this.getModelView(scale));
     }
     

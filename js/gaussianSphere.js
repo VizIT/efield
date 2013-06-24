@@ -114,20 +114,20 @@ function gaussianSphere(x_, y_, z_, r_)
   this.render      = function(gl, surfaceProgram)
   {
     var intrinsicRadius;
-    var verticies;
+    var vertices;
 
     intrinsicRadius = this.getIntrinsicRadius();
-    verticies = this.getVertexBuffers(gl, vertexRegistry);
+    vertices        = this.getVertexBuffers(gl, vertexRegistry);
 
     loadUniformMatrix4fv(gl, surfaceProgram, "modelViewMatrix", this.getModelView(radius/intrinsicRadius));
 
     gl.cullFace(gl.FRONT);
-    this.drawFullSurface(gl,                surfaceProgram,    verticies.verticies, verticies.normals,
-                         verticies.indices, this.getNindices());
+    this.drawFullSurface(gl,                surfaceProgram,    vertices.vertices, vertices.normals,
+                         vertices.indices, this.getNindices());
 
     gl.cullFace(gl.BACK);
-    this.drawFullSurface(gl,                surfaceProgram,    verticies.verticies, verticies.normals,
-                         verticies.indices, this.getNindices());
+    this.drawFullSurface(gl,                surfaceProgram,    vertices.vertices, vertices.normals,
+                         vertices.indices, this.getNindices());
   }
 }
 

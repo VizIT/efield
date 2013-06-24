@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Visualizing an Electric Field With HTML5 and WebGL, Part 7: Charged Plane Examples</title>
+    <link   rel="stylesheet"          href="css/nstyle.css" type="text/css">
+    <meta   http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <link   rel="prev"                href="moreExamples.html">
+    <script type="text/javascript"    src="js/motionEventHandler.js"></script>
+    <script type="text/javascript"    src="js/WebGL.js"></script>
+    <script type="text/javascript"    src="js/geometry.js"></script>
+    <script type="text/javascript"    src="js/charges.js"></script>
+    <script type="text/javascript"    src="js/chargedPlane.js"></script>
+    <script type="text/javascript"    src="js/gaussianSphere.js"></script>
+    <script type="text/javascript"    src="js/chargedSphere.js"></script>
+    <script type="text/javascript"    src="js/efield.js"></script>
+    <script type="text/javascript"
+            src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+  </head>
+  <body>
+<!-- Copyright 2013 VizIT Solutions
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+    <div class="wrapper">
+    <div id="main">
+      <div id="header">
+        <span class="logo2 Fell"><a href = "http://www.vizitsolutions.com/">Vizit Solutions</a></span>
+        <ul>
+          <li><a href="../catalog/" title="Catalog">Catalog</a></li>
+          <li><a href="../" title="Portfolio">Portfolio</a></li>
+          <li><a href="http://blog.vizitsolutions.com/" title="Blog">Blog</a></li>
+          <li><a href="mailto:akluge@vizitsolutions.com?subject=Visualization" title="akluge@vizitsolutions.com">Contact</a></li>
+        </ul>
+      </div>
+    <div class="content">
+        <h1>Visualizing an Electric Field With HTML5 and WebGL, Part 7: Charged Plane Examples</h1>
+        <p id="nowebgl" class="error"></p>
+
+        <figure class="right">
+          <!--A blank area we can draw on with JavaScript. -->
+          <canvas id="drawingSurfaceI" width="300" height="300"></canvas>
+          <figcaption>A positively charged plane.</figcaption>
+        </figure>
+
+
+        <p>
+         Remember from our earlier discussion that a charged plane is
+         constructed by specifying the charge density,  &sigma;, the density
+         of field lines per unit charge, &rho;, and the four corners of the rectangular area
+         of the plane that will be drawn (x0,  y0, z0), (x1,  y1, z1), (x2,  y2, z2), and
+         (x3,  y3, z3).
+        </p>
+<pre>
+     new chargedPlane(sigma, rho,
+                      x0,  y0, z0,
+                      x1,  y1, z1,
+                      x2,  y2, z2,
+                      x3,  y3, z3)
+</pre>
+
+  <p>
+    The single positively charged plane visualization was generated with a charge density
+    using rationalized CGS units of .01 statC/cm and .03 field lines per statC. Though the
+    physics does not depend on the systems of units.
+  </p>
+<pre>
+  var chargeDistribution;
+  var drawingSurface;
+  var renderer;
+
+  drawingSurface     = document.getElementById('drawingSurfaceI');
+  renderer           = new fieldRenderer(drawingSurface);
+  chargeDistribution = new chargedPlane(.01, .03,
+                                        -49.5006781186547524,   5.71067811865475232, -105.710678118654753,
+                                         91.9206781186547524, 105.710678118654752,     -5.71067811865475249,
+                                         91.9206781186547524, -35.7106781186547523,   135.710678118654753,
+                                        -49.5006781186547524, -135.710678118654752,     35.7106781186547525);
+  renderer           = renderer.addChargeDistribution(chargeDistribution);
+  renderer.start();
+</pre>
+
+        <p>
+          In placing the rectangles, I have found it useful to envision I wanted,
+          then explicitly transform the unit rectangle into the desired rectangle
+          using the standard rotation, scaling, and translation matrices. This guarantees
+          that the rectangular segment of the plane is reasonable. These matrices may
+          look a bit different from what you are used to because they make use of
+          homogeneous coordinates, which which are quite common in computer graphics
+          because they make projection easier and allow translations, rotations and
+          scaling to be represented cleanly as a matrix.
+        </p>
+        <br class="clear">
+
+  <math xmlns="http://www.w3.org/1998/Math/MathML" display='block'>
+    <mtable>
+    <mtr>
+    <mtd columnalign="left">
+      <mi>T</mi><mo>(</mo><mi>&Delta;x</mi><mo>,</mo> <mi>&Delta;y</mi><mo>,</mo> <mi>&Delta;z</mi><mo>)</mo>
+    </mtd>
+    <mtd>
+      <mo>=</mo>
+    </mtd>
+    <mtd columnalign="left">
+    <mrow>
+      <mfenced>
+        <mtable>
+          <mtr>
+            <mtd><mn>1</mn></mtd>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mi>&Delta;x</mi></mtd>
+          </mtr>
+          <mtr>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>1</mn></mtd>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mi>&Delta;y</mi></mtd>
+          </mtr>
+          <mtr>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>1</mn></mtd>
+            <mtd><mi>&Delta;z</mi></mtd>
+          </mtr>
+          <mtr>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>1</mn></mtd>
+          </mtr>
+        </mtable>
+      </mfenced>
+    </mrow>
+    </mtd>
+    </mtr>
+
+    <mtr>
+    <mtd columnalign="left">
+      <msub><mi>R</mi><mi>x</mi></msub><mo>(</mo><mi>&#x3B8;</mi><mo>)</mo>
+    </mtd>
+    <mtd>
+      <mo>=</mo>
+    </mtd>
+    <mtd>
+    <mrow>
+     <mfenced>
+       <mtable>
+         <mtr>
+           <mtd><mn>1</mn></mtd>
+           <mtd><mn>0</mn></mtd>
+           <mtd><mn>0</mn></mtd>
+           <mtd><mn>0</mn></mtd>
+         </mtr>
+         <mtr>
+           <mtd><mn>0</mn></mtd>
+           <mtd><mrow><mi>Cos</mi> <mo>(</mo> <mi>&#x3B8;</mi> <mo>)</mo></mrow></mtd>
+           <mtd><mrow><mo>-</mo> <mrow><mi>Sin</mi> <mo>(</mo> <mi>&#x3B8;</mi> <mo>)</mo></mrow></mrow></mtd>
+           <mtd><mn>0</mn></mtd>
+         </mtr>
+         <mtr>
+           <mtd><mn>0</mn></mtd>
+           <mtd><mrow><mi>Sin</mi> <mo>(</mo> <mi>&#x3B8;</mi> <mo>)</mo></mrow></mtd>
+           <mtd><mrow><mi>Cos</mi> <mo>(</mo> <mi>&#x3B8;</mi> <mo>)</mo></mrow></mtd>
+           <mtd><mn>0</mn></mtd>
+         </mtr>
+         <mtr>
+           <mtd><mn>0</mn></mtd>
+           <mtd><mn>0</mn></mtd>
+           <mtd><mn>0</mn></mtd>
+           <mtd><mn>1</mn></mtd>
+         </mtr>
+       </mtable>
+     </mfenced> 
+   </mrow>
+   </mtd>
+   </mtr>
+   <mtr>
+    <mtd columnalign="left">
+      <msub><mi>R</mi><mi>y</mi></msub><mo>(</mo><mi>&#x3C8;</mi><mo>)</mo>
+    </mtd>
+    <mtd>
+      <mo>=</mo>
+    </mtd>
+    <mtd>
+    <mrow>
+      <mfenced>
+        <mtable>
+          <mtr>
+            <mtd><mrow><mi>Cos</mi><mo>(</mo><mi>&#x3C8;</mi><mo>)</mo></mrow></mtd>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mrow><mi>Sin</mi><mo>(</mo><mi>&#x3C8;</mi><mo>)</mo></mrow></mtd>
+            <mtd><mn>0</mn></mtd>
+          </mtr>
+          <mtr>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>1</mn></mtd>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>0</mn></mtd>
+          </mtr>
+          <mtr>
+            <mtd><mrow><mo>-</mo><mrow><mi>Sin</mi><mo>(</mo><mi>&#x3C8;</mi><mo>)</mo></mrow></mrow></mtd>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mrow><mi>Cos</mi><mo>(</mo><mi>&#x3C8;</mi><mo>)</mo></mrow></mtd>
+            <mtd><mn>0</mn></mtd>
+          </mtr>
+          <mtr>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>1</mn></mtd>
+          </mtr>
+        </mtable>
+      </mfenced>
+    </mrow>
+    </mtd>
+    </mtr>
+    <mtr>
+    <mtd columnalign="left">
+      <msub><mi>R</mi><mi>z</mi></msub><mo>(</mo><mi>&varphi;</mi><mo>)</mo>
+    </mtd>
+    <mtd>
+      <mo>=</mo>
+    </mtd>
+    <mtd>
+    <mrow>
+      <mfenced>
+        <mtable>
+          <mtr>
+            <mtd><mrow><mi>Cos</mi><mo>(</mo><mtext>&varphi;</mtext><mo>)</mo></mrow></mtd>
+            <mtd><mrow><mo>-</mo> <mrow><mi>Sin</mi><mo>(</mo><mtext>&varphi;</mtext><mo>)</mo></mrow></mrow></mtd>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>0</mn></mtd>
+          </mtr>
+          <mtr>
+            <mtd><mrow><mi>Sin</mi><mo>(</mo><mtext>&varphi;</mtext><mo>)</mo></mrow></mtd>
+            <mtd><mrow><mi>Cos</mi><mo>(</mo><mtext>&varphi;</mtext><mo>)</mo></mrow></mtd>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>0</mn></mtd>
+          </mtr>
+          <mtr>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>1</mn></mtd>
+            <mtd><mn>0</mn></mtd>
+          </mtr>
+          <mtr>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>1</mn></mtd>
+          </mtr>
+        </mtable>
+      </mfenced>
+    </mrow>
+    </mtd>
+    </mtr>
+
+    <mtr>
+    <mtd columnalign="left">
+      <mi>S</mi><mo>(</mo><msub><mi>S</mi><mi>x</mi></msub><mo>,</mo> <msub><mi>S</mi><mi>y</mi></msub><mo>,</mo><msub><mi>S</mi><mi>z</mi></msub> <mo>)</mo>
+    </mtd>
+    <mtd>
+      <mo>=</mo>
+    </mtd>
+    <mtd columnalign="left">
+    <mrow>
+      <mfenced>
+      <mtable>
+        <mtr>
+          <mtd><mi>Sx</mi></mtd>
+          <mtd><mn>0</mn></mtd>
+          <mtd><mn>0</mn></mtd>
+          <mtd><mn>0</mn></mtd>
+        </mtr>
+        <mtr>
+          <mtd><mn>0</mn></mtd>
+          <mtd><mi>Sy</mi></mtd>
+          <mtd><mn>0</mn></mtd>
+          <mtd><mn>0</mn></mtd>
+        </mtr>
+        <mtr>
+          <mtd><mn>0</mn></mtd>
+          <mtd><mn>0</mn></mtd>
+          <mtd><mi>Sz</mi></mtd>
+          <mtd><mn>0</mn></mtd>
+        </mtr>
+        <mtr>
+          <mtd><mn>0</mn></mtd>
+          <mtd><mn>0</mn></mtd>
+          <mtd><mn>0</mn></mtd>
+          <mtd><mn>1</mn></mtd>
+        </mtr>
+      </mtable>
+    </mfenced>
+    </mrow>
+  </math>
+
+       <p>
+         We can apply these matrices easily if we start with the unit rectangle, <i>U</i>
+         in a matrix where each column is a vertex, again using homogeneous coordinates.
+       </p>
+
+  <math xmlns="http://www.w3.org/1998/Math/MathML" display='block'>
+    <mtable>
+    <mtr>
+    <mtd columnalign="left">
+      <mi>U</mi>
+    </mtd>
+    <mtd>
+      <mo>=</mo>
+    </mtd>
+    <mtd columnalign="left">
+    <mrow>
+      <mfenced>
+        <mtable>
+          <mtr>
+            <mtd><mrow><mo>-</mo> <mn>0.5</mn></mrow></mtd>
+            <mtd><mn>0.5</mn></mtd>
+            <mtd><mn>0.5</mn></mtd>
+            <mtd><mrow><mo>-</mo> <mn>0.5</mn></mrow></mtd>
+          </mtr>
+          <mtr>
+            <mtd><mn>0.5</mn></mtd>
+            <mtd><mn>0.5</mn></mtd>
+            <mtd><mrow><mo>-</mo> <mn>0.5</mn></mrow></mtd>
+            <mtd><mrow><mo>-</mo> <mn>0.5</mn></mrow></mtd>
+          </mtr>
+          <mtr>
+            <mtd><mn>0.</mn></mtd>
+            <mtd><mn>0.</mn></mtd>
+            <mtd><mn>0.</mn></mtd>
+            <mtd><mn>0.</mn></mtd>
+          </mtr>
+          <mtr>
+            <mtd><mn>1.</mn></mtd>
+            <mtd><mn>1.</mn></mtd>
+            <mtd><mn>1.</mn></mtd>
+            <mtd><mn>1.</mn></mtd>
+          </mtr>
+        </mtable>
+      </mfenced>
+    </mrow>
+  </math>
+
+        <p>
+         The arbitrary rectangle <i>P</i> representing the infinite plane is then built by
+         transforming the unit rectangle <i>U</i>
+        </p>
+        <math xmlns="http://www.w3.org/1998/Math/MathML" display='block'>
+          <mi>P</mi><mo>=</mo><mi>T</mi><mo>(</mo><mi>&Delta;x</mi><mo>,</mo> <mi>&Delta;y</mi><mo>,</mo> <mi>&Delta;z</mi><mo>)</mo>
+                         <msub><mi>R</mi><mi>z</mi></msub><mo>(</mo><mi>&varphi;</mi><mo>)</mo>
+                         <msub><mi>R</mi><mi>x</mi></msub><mo>(</mo><mi>&#x3B8;</mi><mo>)</mo>
+                         <msub><mi>R</mi><mi>y</mi></msub><mo>(</mo><mi>&#x3C8;</mi><mo>)</mo>
+                         <mi>S</mi><mo>(</mo><msub><mi>S</mi><mi>x</mi></msub><mo>,</mo> <msub><mi>S</mi><mi>y</mi></msub><mo>,</mo><msub><mi>S</mi><mi>z</mi></msub> <mo>)</mo>
+                         <mi>U</mi>
+        </math>
+
+        <p>
+         The positively charged plane on this page is created by scaling the unit rectangle
+         by 200 in the <i>x</i> and <i>y</i> directions, 1 in the <i>z</i> direction, rotating
+         it by &pi;/4 radians about the x and y axes, then translating it by (21.21, -15, 15).
+         Dropping these values into the expression for P:
+        </p>
+
+        <math xmlns="http://www.w3.org/1998/Math/MathML" display='block'>
+          <mtable>
+            <mtr>
+              <mtd columnalign="left">
+                <mi>P</mi>
+              </mtd>
+              <mtd>
+                <mo>=</mo>
+              </mtd>
+              <mtd columnalign="left">
+                <mi>T</mi><mo>(</mo><mn>21.21</mn><mo>,</mo> <mn>-15</mn><mo>,</mo> <mn>15</mn><mo>)</mo>
+                <msub><mi>R</mi><mi>z</mi></msub><mo>(</mo><mi>0</mi><mo>)</mo>
+                <msub><mi>R</mi><mi>x</mi></msub><mo>(</mo><mo>-</mo><mfrac><mi>&pi;</mi><mn>4</mn></mfrac><mo>)</mo>
+                <msub><mi>R</mi><mi>y</mi></msub><mo>(</mo><mo>-</mo><mfrac><mi>&pi;</mi><mn>4</mn></mfrac><mo>)</mo>
+                <mi>S</mi><mo>(</mo><mn>200</mn><mo>,</mo> <mn>200</mn><mo>,</mo> <mn>1</mn> <mo>)</mo>
+                <mi>U</mi>
+              </mtd>
+            </mtr>
+            <mtr>
+              <mtd></mtd>
+              <mtd>
+                <mo>=</mo>
+              </mtd>
+              <mtd columnalign="left">
+                <mrow>
+                  <mfenced>
+                    <mtable>
+                      <mtr>
+                        <mtd><mn>1</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>21.21</mn></mtd>
+                      </mtr>
+                      <mtr>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>1</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mi>-15</mi></mtd>
+                      </mtr>
+                      <mtr>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>1</mn></mtd>
+                        <mtd><mn>15</mn></mtd>
+                      </mtr>
+                      <mtr>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>1</mn></mtd>
+                      </mtr>
+                    </mtable>
+                  </mfenced>
+                  <mfenced>
+                    <mtable>
+                      <mtr>
+                        <mtd><mn>1</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                      </mtr>
+                      <mtr>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mrow><mi>Cos</mi> <mo>(</mo> <mo>-</mo><mfrac><mi>&pi;</mi><mn>4</mn></mfrac> <mo>)</mo></mrow></mtd>
+                        <mtd><mrow><mo>-</mo> <mrow><mi>Sin</mi> <mo>(</mo> <mo>-</mo><mfrac><mi>&pi;</mi><mn>4</mn></mfrac> <mo>)</mo></mrow></mrow></mtd>
+                        <mtd><mn>0</mn></mtd>
+                      </mtr>
+                      <mtr>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mrow><mi>Sin</mi> <mo>(</mo> <mo>-</mo><mfrac><mi>&pi;</mi><mn>4</mn></mfrac> <mo>)</mo></mrow></mtd>
+                        <mtd><mrow><mi>Cos</mi> <mo>(</mo> <mo>-</mo><mfrac><mi>&pi;</mi><mn>4</mn></mfrac> <mo>)</mo></mrow></mtd>
+                        <mtd><mn>0</mn></mtd>
+                      </mtr>
+                      <mtr>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>1</mn></mtd>
+                      </mtr>
+                    </mtable>
+                  </mfenced> 
+                  <mfenced>
+                    <mtable>
+                      <mtr>
+                        <mtd><mrow><mi>Cos</mi><mo>(</mo><mo>-</mo><mfrac><mi>&pi;</mi><mn>4</mn></mfrac><mo>)</mo></mrow></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mrow><mi>Sin</mi><mo>(</mo><mo>-</mo><mfrac><mi>&pi;</mi><mn>4</mn></mfrac><mo>)</mo></mrow></mtd>
+                        <mtd><mn>0</mn></mtd>
+                      </mtr>
+                      <mtr>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>1</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                      </mtr>
+                      <mtr>
+                        <mtd><mrow><mo>-</mo><mrow><mi>Sin</mi><mo>(</mo><mo>-</mo><mfrac><mi>&pi;</mi><mn>4</mn></mfrac><mo>)</mo></mrow></mrow></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mrow><mi>Cos</mi><mo>(</mo><mo>-</mo><mfrac><mi>&pi;</mi><mn>4</mn></mfrac><mo>)</mo></mrow></mtd>
+                        <mtd><mn>0</mn></mtd>
+                      </mtr>
+                      <mtr>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>1</mn></mtd>
+                      </mtr>
+                    </mtable>
+                  </mfenced>
+                  <mfenced>
+                    <mtable>
+                      <mtr>
+                        <mtd><mn>200</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                      </mtr>
+                      <mtr>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>200</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                      </mtr>
+                      <mtr>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>1</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                      </mtr>
+                      <mtr>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>0</mn></mtd>
+                        <mtd><mn>1</mn></mtd>
+                      </mtr>
+                    </mtable>
+                  </mfenced>
+                  <mfenced>
+                    <mtable>
+                      <mtr>
+                        <mtd><mrow><mo>-</mo> <mn>0.5</mn></mrow></mtd>
+                        <mtd><mn>0.5</mn></mtd>
+                        <mtd><mn>0.5</mn></mtd>
+                        <mtd><mrow><mo>-</mo> <mn>0.5</mn></mrow></mtd>
+                      </mtr>
+                      <mtr>
+                        <mtd><mn>0.5</mn></mtd>
+                        <mtd><mn>0.5</mn></mtd>
+                        <mtd><mrow><mo>-</mo> <mn>0.5</mn></mrow></mtd>
+                        <mtd><mrow><mo>-</mo> <mn>0.5</mn></mrow></mtd>
+                      </mtr>
+                      <mtr>
+                        <mtd><mn>0.</mn></mtd>
+                        <mtd><mn>0.</mn></mtd>
+                        <mtd><mn>0.</mn></mtd>
+                        <mtd><mn>0.</mn></mtd>
+                      </mtr>
+                      <mtr>
+                        <mtd><mn>1.</mn></mtd>
+                        <mtd><mn>1.</mn></mtd>
+                        <mtd><mn>1.</mn></mtd>
+                        <mtd><mn>1.</mn></mtd>
+                      </mtr>
+                    </mtable>
+                  </mfenced>
+                </mrow>
+              </mtd>
+            </mtr>
+            <mtr>
+              <mtd></mtd>
+              <mtd>
+                <mo>=</mo>
+              </mtd>
+              <mtd columnalign="left">
+                <mfenced>
+                  <mtable>
+                    <mtr>
+                      <mtd><mrow><mo>-</mo> <mn>49.5006781186547524</mn></mrow></mtd>
+                      <mtd><mn>91.9206781186547524</mn></mtd>
+                      <mtd><mn>91.9206781186547524</mn></mtd>
+                      <mtd><mrow><mo>-</mo> <mn>49.5006781186547524</mn></mrow></mtd>
+                    </mtr>
+                    <mtr>
+                      <mtd><mn>5.71067811865475232</mn></mtd>
+                      <mtd><mn>105.710678118654752</mn></mtd>
+                      <mtd><mrow><mo>-</mo> <mn>35.7106781186547523</mn></mrow></mtd>
+                      <mtd><mrow><mo>-</mo> <mn>135.710678118654752</mn></mrow></mtd>
+                    </mtr>
+                    <mtr>
+                      <mtd><mrow><mo>-</mo> <mn>105.710678118654753</mn></mrow></mtd>
+                      <mtd><mrow><mo>-</mo> <mn>5.71067811865475249</mn></mrow></mtd>
+                      <mtd><mn>135.710678118654753</mn></mtd>
+                      <mtd><mn>35.7106781186547525</mn></mtd>
+                    </mtr>
+                    <mtr>
+                      <mtd><mn>1.</mn></mtd>
+                      <mtd><mn>1.</mn></mtd>
+                      <mtd><mn>1.</mn></mtd>
+                      <mtd><mn>1.</mn></mtd>
+                    </mtr>
+                  </mtable>
+                </mfenced>
+              </mtd>
+            </mtr>
+          </mtable>
+        </math>
+
+        <p>
+         Then read off each column as the (<i>x,y,z</i>) coordinates of the corners of the rectangle.
+        </p>
+        
+        <br class="clear">
+
+        <hr>
+        <span class="floatleft">Previous: <a href = "moreExamples.html">More Examples</a></span>
+        <br class="clear">
+        <hr>
+    </div>
+    </div>
+  </div>
+  <script type="text/javascript">
+
+    var chargeDistribution;
+    var drawingSurface;
+    var renderer;
+
+
+    drawingSurface     = document.getElementById('drawingSurfaceI');
+    renderer           = new fieldRenderer(drawingSurface);
+    chargeDistribution = new chargedPlane(.01, .03,
+                                          -49.4974746830583267,              5.71067811865475237,          135.710678118654752,
+                                           91.9238815542511782,            105.710678118654752,             35.7106781186547525,
+                                           91.9238815542511782,            -35.7106781186547524,          -105.710678118654752,
+                                          -49.49747468305832667272915846, -135.7106781186547524513414694,   -5.710678118654752478791493056);
+
+
+    renderer           = renderer.addChargeDistribution(chargeDistribution);
+    renderer.start();
+
+
+    drawingSurface     = document.getElementById('drawingSurfaceII');
+    renderer           = new fieldRenderer(drawingSurface);
+    renderer           = placeStartPoints(renderer);
+    gaussianSurface    = new gaussianSphere(0.0, 0.0, 0.0, 60.0);
+    renderer           = renderer.addGaussianSurface(gaussianSurface);
+    chargeDistribution = new chargedSphere( -1, 0.0, 0.0, 0.0, 0.0, 20.0, 50.0);
+    renderer           = renderer.addChargeDistribution(chargeDistribution);
+    renderer.start();
+  </script>
+
+  <script type="text/javascript">
+    "use strict";
+    var error;
+    var txt;
+    var canvasSupported = !!window.HTMLCanvasElement;
+    if (canvasSupported)
+    { 
+      var myCanvas       = document.createElement('canvas');
+      var gl             = myCanvas.getContext("experimental-webgl")
+                           || myCanvas.getContext("webgl");
+      if (!gl)
+      {
+        txt = "Your browser supports the HTML5 canvas, but does not support WebGL."
+      }
+    }
+    else
+    {
+      txt = "Your browser does not support the HTML5 canvas, which is required for WebGL."
+    }
+
+    if (txt != null)
+    {
+        txt += " To see the examples on this page, please get a <a href"
+            +  "= 'http://get.webgl.org/'>browser that supports WebGL</a>.";
+        error = document.getElementById("nowebgl");
+        error.innerHTML=txt;
+        error.style.display="block";
+    }
+  </script>
+</body>
+</html>

@@ -5,7 +5,7 @@
     <link   rel="stylesheet"          href="css/nstyle.css" type="text/css">
     <meta   http-equiv="Content-Type" content="text/html;charset=utf-8" >
     <link   rel="prev"                href="gaussianSurfaces.html">
-    <link   rel="next"                href="examples.html">
+    <link   rel="next"                href="chargedPlane.html">
     <script type="text/javascript"    src="js/motionEventHandler.js"></script>
     <script type="text/javascript"    src="js/WebGL.js"></script>
     <script type="text/javascript"    src="js/geometry.js"></script>
@@ -37,8 +37,8 @@
       <div id="header">
         <span class="logo2 Fell"><a href = "http://www.vizitsolutions.com/">Vizit Solutions</a></span>
         <ul>
-          <li><a href="http://www.vizitsolutions.com/portfolio/catalog/" title="Catalog">Catalog</a></li>
-          <li><a href="http://www.vizitsolutions.com/portfolio/" title="Portfolio">Portfolio</a></li>
+          <li><a href="../catalog/" title="Catalog">Catalog</a></li>
+          <li><a href="../" title="Portfolio">Portfolio</a></li>
           <li><a href="http://blog.vizitsolutions.com/" title="Blog">Blog</a></li>
           <li><a href="mailto:akluge@vizitsolutions.com?subject=Visualization" title="akluge@vizitsolutions.com">Contact</a></li>
         </ul>
@@ -54,7 +54,7 @@
         <figure class="right">
           <!--A blank area we can draw on with JavaScript. -->
           <canvas id="drawingSurfaceI" width="300" height="300"></canvas>
-          <figcaption>A spherical charge distrbution enveloping a gausian surface.</figcaption>
+          <figcaption>A spherical charge distribution enveloping a Gaussian surface.</figcaption>
         </figure>
 
 
@@ -63,21 +63,21 @@
          by translucent shapes. This allows other components of the system to be viewed through
          the charge distribution. This first example is of a spherical charge
          distribution with inner radius a=20 and outer radius b=50. This charge distribution
-         completely surrounds a gaussian surface with r=10. It is now possible to zoom in
-         and see that the gaussian surface does not enclose any charge.
+         completely surrounds a Gaussian surface with r=10. It is now possible to zoom in
+         and see that the Gaussian surface does not enclose any charge.
         </p>
 
         <figure class="left">
           <!--A blank area we can draw on with JavaScript. -->
           <canvas id="drawingSurfaceII" width="300" height="300"></canvas>
-          <figcaption>The gaussian surface completely surrounds the charge.</figcaption>
+          <figcaption>The Gaussian surface completely surrounds the charge.</figcaption>
         </figure>
 
         <p>
-          The other example in this set shows the gaussian sphere surrounding the
-         charge distribution. Of course it is possible to draw the gaussian surface
-         at an arbitrary poistion, and in the long term it will be possible to move
-         and resize elements, so that it will be possible to move the gaussian surface
+          The other example in this set shows the Gaussian sphere surrounding the
+         charge distribution. Of course it is possible to draw the Gaussian surface
+         at an arbitrary position, and in the long term it will be possible to move
+         and resize elements, so that it will be possible to move the Gaussian surface
          through the charge distribution, allowing for much more interesting and lively
          discussions.
         </p>
@@ -87,7 +87,7 @@
 
         <hr>
         <span class="floatleft">Previous: <a href = "gaussianSurfaces.html">Gauss's Law Examples</a></span>
-        <span class="floatright">Next: <a href = "examples.html">Code and Examples</a></span>
+        <span class="floatright">Next: <a href = "chargedPlane.html">A Charged Plane</a></span>
         <br class="clear">
         <hr>
     </div>
@@ -141,7 +141,7 @@
     renderer           = placeStartPoints(renderer);
     gaussianSurface    = new gaussianSphere(0.0, 0.0, 0.0, 10.0);
     renderer           = renderer.addGaussianSurface(gaussianSurface);
-    chargeDistribution = new chargedSphere( -1, 0.0, 0.0, 0.0, 20.0, 50.0);
+    chargeDistribution = new chargedSphere( -1, 0.0, 0.0, 0.0, 0.0, 20.0, 50.0);
     renderer           = renderer.addChargeDistribution(chargeDistribution);
     renderer.start();
 
@@ -151,7 +151,7 @@
     renderer           = placeStartPoints(renderer);
     gaussianSurface    = new gaussianSphere(0.0, 0.0, 0.0, 60.0);
     renderer           = renderer.addGaussianSurface(gaussianSurface);
-    chargeDistribution = new chargedSphere( -1, 0.0, 0.0, 0.0, 20.0, 50.0);
+    chargeDistribution = new chargedSphere( -1, 0.0, 0.0, 0.0, 0.0, 20.0, 50.0);
     renderer           = renderer.addChargeDistribution(chargeDistribution);
     renderer.start();
   </script>

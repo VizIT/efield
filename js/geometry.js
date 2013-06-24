@@ -77,9 +77,12 @@ function surfaceGeometry(nvertices_, nindices_)
 
   /**
    * An enum cataloging the known shapes.
+   * SPHERE
+   * RECTANGLE, which may be folded into a cube eventually.
    */
   GeometryEngine.Shapes = {
-                           SPHERE : {value: 0}
+                           SPHERE         : {value: 0},
+                           SQUARE         : {value: 1}
                           };
 
 
@@ -120,6 +123,102 @@ function surfaceGeometry(nvertices_, nindices_)
   }
 
   /**
+   * Rebuild this as a cube with the first four indices forming a unit square
+   * centered at the origin.
+   */
+  GeometryEngine.square          = function()
+  {
+    var bottom;
+    /**
+     * Vertices that define the edges of the area of the plane shown to
+     * the user the plane itself is infinite,
+     */
+    var boundingBox;
+    var left;
+    var normal;
+    var right;
+    var shape;
+    var top;
+
+    shape       = GeometryEngine.Shapes.SQUARE;
+    top         =  0.5;
+    bottom      = -0.5;
+    left        = -0.5;
+    right       =  0.5;
+    boundingBox = new Array(left,  top,    0,  // x1, y1, z1
+                            right, top,    0,  // x2, y2, z2
+                            right, bottom, 0,  // x3, y3, z3
+                            left,  bottom, 0); // x4, y4, z4
+    // The normal is a unit vector in the z direction.
+    normal      = new Array(0,0,1);
+
+    this.getNindices = function()
+    {
+      // TODO: Magic number!
+      return 6;
+    }
+
+    /**
+     * Fill in the vertices, normals and indices for a unit square
+     * about the origin.
+     */
+    this.computeGeometry  = function(surfaceGeometry, boundingBox)
+    {
+      var indices;
+      var normals;
+      var vertices;
+
+      vertices = surfaceGeometry.getVertices();
+      normals  = surfaceGeometry.getNormals();
+      indices  = surfaceGeometry.getIndices();
+
+      for(var i=0; i<12; i++)
+      {
+        vertices[i] = boundingBox[i];
+        normals[i]   = normal[i%3];
+      }
+      indices[0] = 0;
+      indices[1] = 3;
+      indices[2] = 1;
+      indices[3] = 3;
+      indices[4] = 2;
+      indices[5] = 1;
+
+      surfaceGeometry.setNvertices(12);
+      surfaceGeometry.setNindices(6);
+      
+    }
+    /**
+     * Retrieve vertex buffers from the registry if the already exist,
+     * otherwise build and register them.
+     */
+    this.getVertexBuffers    = function(gl, vertexRegistry)
+    {
+      var geometry;
+      var vertices;
+
+      if (vertexRegistry.hasVertices(shape))
+      {
+        vertices = vertexRegistry.retrieveVertices(shape);
+      }
+      else
+      {
+        // TODO look for more effecient ways to allocate the storage
+        // possibly generating each array then the vbo individually.
+        // Three coordinates for each of four vertices that define a square.
+        geometry  = new surfaceGeometry(3*4, 6);
+        vertices = {};
+        this.computeGeometry(geometry, boundingBox);
+        vertices.vertices = createBuffer(gl, geometry.getVertices());
+        vertices.normals  = createBuffer(gl, geometry.getNormals());
+        vertices.indices  = createIndexBuffer(gl, geometry.getIndices());
+        vertexRegistry.registerVertices(shape, vertices);
+      }
+      return vertices;
+    }
+  }
+
+  /**
    * A fixed radius sphere. Use the model view matrix to position and scale it.
    */
   GeometryEngine.sphere  = function()
@@ -150,7 +249,7 @@ function surfaceGeometry(nvertices_, nindices_)
     }
     
     /**
-     * Compute the verticies, normal and indices for a spherical surface of
+     * Compute the vertices, normal and indices for a spherical surface of
      * radius r, divided into nlatitude and nlongitude pieces.
      */
     this.computeGeometry  = function(surfaceGeometry, r, nlatitude, nlongitude)
@@ -237,25 +336,25 @@ function surfaceGeometry(nvertices_, nindices_)
     this.getVertexBuffers    = function(gl, vertexRegistry)
     {
       var geometry;
-      var verticies;
+      var vertices;
 
       if (vertexRegistry.hasVertices(shape))
       {
-        verticies = vertexRegistry.retrieveVertices(shape);
+        vertices = vertexRegistry.retrieveVertices(shape);
       }
       else
       {
         // TODO look for more effecient ways to allocate the storage
         // possibly generating each array then the vbo individually.
         geometry  = new surfaceGeometry(3*(nlongitude+1)*(nlatitude+1), 6*nlongitude*nlatitude);
-        verticies = {};
+        vertices = {};
         this.computeGeometry(geometry, intrinsicRadius, nlongitude, nlatitude);
-        verticies.verticies = createBuffer(gl, geometry.getVertices());
-        verticies.normals   = createBuffer(gl, geometry.getNormals());
-        verticies.indices   = createIndexBuffer(gl, geometry.getIndices());
-        vertexRegistry.registerVertices(shape, verticies);
+        vertices.vertices = createBuffer(gl, geometry.getVertices());
+        vertices.normals   = createBuffer(gl, geometry.getNormals());
+        vertices.indices   = createIndexBuffer(gl, geometry.getIndices());
+        vertexRegistry.registerVertices(shape, vertices);
       }
-      return verticies;
+      return vertices;
     }
   }
 
