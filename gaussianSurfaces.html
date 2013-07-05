@@ -4,7 +4,7 @@
     <title>Visualizing an Electric Field With HTML5 and WebGL, Part 2: Gaussian Surfaces</title>
     <meta   http-equiv="Content-Type" content="text/html;charset=utf-8" >
     <meta   name="viewport"           content="width=device-width, initial-scale=1.0">
-    <link   rel="stylesheet"          href="../../nstyle.css" type="text/css">
+    <link   rel="stylesheet"          href="css/nstyle.css" type="text/css">
     <link   rel="prev"                href="index.html">
     <link   rel="next"                href="chargedDistributions.html">
     <script type="text/javascript"    src="js/motionEventHandler.js"></script>
@@ -38,8 +38,8 @@
       <div id="header">
         <span class="logo2 Fell"><a href = "http://www.vizitsolutions.com/">Vizit Solutions</a></span>
         <ul>
-          <li><a href="../catalog/" title="Catalog">Catalog</a></li>
-          <li><a href="../" title="Portfolio">Portfolio</a></li>
+          <li><a href="http://www.vizitsolutions.com/portfolio/catalog/" title="Catalog">Catalog</a></li>
+          <li><a href="http://www.vizitsolutions.com/portfolio/" title="Portfolio">Portfolio</a></li>
           <li><a href="http://blog.vizitsolutions.com/" title="Blog">Blog</a></li>
           <li><a href="mailto:akluge@vizitsolutions.com?subject=Visualization" title="akluge@vizitsolutions.com">Contact</a></li>
         </ul>
@@ -94,7 +94,7 @@
 
         <p>
           For example, a student can examine the visualization with the charge at the
-         center of the Gaussian sphere and see that the electric field is constant and
+         center of the Gaussian sphere<sup>1</sup> and see that the electric field is constant and
          perpendicular to the surface, or parallel to <math xmlns="http://www.w3.org/1998/Math/MathML"
          display='inline'><mi>d</mi><mi mathvariant='bold'>A</mi></math>
         </p>
@@ -126,7 +126,11 @@
         </p>
 
         <br class="clear">
-
+        <div class="footnote">
+        1) The spherical geometry is based on the WebGL cookbook <a href
+           = "http://learningwebgl.com/cookbook/index.php/How_to_draw_a_sphere">How to
+           draw a sphere</a> rescipe.
+        </div>
         <hr>
         <span class="floatleft">Previous: <a href = "index.html">Introduction</a></span>
         <span class="floatright">Next: <a href = "chargedDistributions.html">Charge Distributions</a></span>
