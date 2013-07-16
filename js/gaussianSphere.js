@@ -1,6 +1,6 @@
 /*
  * Represent a Gaussian sphere. This is a Gaussian surface, it will be drawn but will
- * have no effect on the field. The sphere or radius r is sentered at (x, y, z).
+ * have no effect on the field. The sphere of radius r is centered at (x, y, z).
  */
 function gaussianSphere(x_, y_, z_, r_)
 {

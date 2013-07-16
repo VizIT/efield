@@ -78,7 +78,7 @@
       // Binding an object in Open GL creates it, and makes it the target of subsequent manipulations.
       gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
       // loads the current buffer, the vertexBuffer found above, with the vertex data.
-      // The gl bufer is strongly types with 32 bit floating data.
+      // The gl bufer is strongly typed with 32 bit floating point data.
       gl.bufferData(gl.ARRAY_BUFFER, floatArray, gl.STATIC_DRAW);
 
       return vertexBuffer;
@@ -92,7 +92,7 @@
       // Binding an object in Open GL creates it, and makes it the target of subsequent manipulations.
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
       // loads the current buffer, the vertexBuffer found above, with the vertex data.
-      // The gl bufer is strongly types with 32 bit floating data.
+      // The gl bufer is strongly types with 16 bit integer data.
       gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, UintArray, gl.STATIC_DRAW);
 
       return indexBuffer;

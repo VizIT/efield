@@ -17,9 +17,9 @@ function surfaceGeometry(nvertices_, nindices_)
   nindices  = nindices_;
   nvertices = nvertices_;
 
-  vertices  = new Float32Array(nvertices_);
+  vertices  = new Float32Array(3*nvertices_);
   indices   = new Uint16Array(nindices_);
-  normals   = new Float32Array(nvertices_);
+  normals   = new Float32Array(3*nvertices_);
 
   this.setNindices        = function(n)
   {
@@ -78,11 +78,13 @@ function surfaceGeometry(nvertices_, nindices_)
   /**
    * An enum cataloging the known shapes.
    * SPHERE
-   * RECTANGLE, which may be folded into a cube eventually.
+   * RECTANGLE, which may be folded into a cube eventually,
+   * and CYLINDER.
    */
   GeometryEngine.Shapes = {
-                           SPHERE         : {value: 0},
-                           SQUARE         : {value: 1}
+                           SPHERE         : {value: "sphere"},
+                           SQUARE         : {value: "square"},
+                           CYLINDER       : {value: "cylinder"}
                           };
 
 
@@ -197,22 +199,188 @@ function surfaceGeometry(nvertices_, nindices_)
       var geometry;
       var vertices;
 
-      if (vertexRegistry.hasVertices(shape))
+      if (vertexRegistry.hasVertices(shape.value))
       {
-        vertices = vertexRegistry.retrieveVertices(shape);
+        vertices = vertexRegistry.retrieveVertices(shape.value);
       }
       else
       {
         // TODO look for more effecient ways to allocate the storage
         // possibly generating each array then the vbo individually.
         // Three coordinates for each of four vertices that define a square.
-        geometry  = new surfaceGeometry(3*4, 6);
+        geometry  = new surfaceGeometry(4, 6);
         vertices = {};
         this.computeGeometry(geometry, boundingBox);
         vertices.vertices = createBuffer(gl, geometry.getVertices());
         vertices.normals  = createBuffer(gl, geometry.getNormals());
         vertices.indices  = createIndexBuffer(gl, geometry.getIndices());
-        vertexRegistry.registerVertices(shape, vertices);
+        vertexRegistry.registerVertices(shape.value, vertices);
+      }
+      return vertices;
+    }
+  }
+
+  /**
+   * A unit cylinder centered about the origin, and oriented along the z-axis.
+   */
+  GeometryEngine.cylinder          = function()
+  {
+    var baseRadius;
+    var bottom;
+    var height;
+    var nslices;
+    var shape;
+    var top;
+
+    baseRadius  = .5;
+    height      = 1;
+    bottom      = -height/2;
+    nslices     = 30;
+    shape       = GeometryEngine.Shapes.CYLINDER;
+    top         = height/2;
+
+    this.getBaseRadius = function()
+    {
+      return baseRadius;
+    }
+
+    this.getShape  = function()
+    {
+      return shape;;
+    }
+
+    this.getNindices = function()
+    {
+      return 4*nslices+6;
+    }
+
+    /**
+     * Generate vertices, normals and indices for the end caps and wall of the
+     * cylinder.
+     *
+     * @param {surfaceGeometry} surfaceGeometry Holder for the vertices, normals,
+     *        and indices for the surface. Expected to have 4*nslices entries for
+     *        each of these.
+     */
+    this.computeGeometry  = function(surfaceGeometry)
+    {
+      /** The index for populating the vertex array for the bottom cap. */
+      var bottomIndex;
+      var dtheta;
+      var i;
+      var indices;
+      var normals;
+      var sideIndex;
+      var theta;
+      /** The vertex array index for the top cap */
+      var topIndex;
+      var vertices;
+
+      vertices = surfaceGeometry.getVertices();
+      normals  = surfaceGeometry.getNormals();
+      indices  = surfaceGeometry.getIndices();
+
+      // The center of the top cap
+      vertices[0]           = 0;
+      normals[0]            = 0;
+      vertices[1]           = 0;
+      normals[1]            = 0;
+      vertices[2]           = top;
+      normals[2]            = 1;
+      indices[0]            = 0;
+      // the center of the bottom cap
+      bottomIndex            = 3*nslices+4;
+      indices[bottomIndex]   = bottomIndex;
+      bottomIndex           *= 3;
+      vertices[bottomIndex]  = 0;
+      normals[bottomIndex++] = 0;
+      vertices[bottomIndex]  = 0;
+      normals[bottomIndex++] = 0;
+      vertices[bottomIndex]  = bottom;
+      normals[bottomIndex]   = -1;
+
+      // Triangle fans use ntraingles+2 points
+      // Build the top cap
+      for(i=1; i<=nslices+1; i++)
+      {
+        theta                  = (i-1)*2*Math.PI/nslices;
+        indices[i]             = i;
+        topIndex               = 3*i;
+        vertices[topIndex]     = baseRadius*Math.cos(theta);
+        normals[topIndex++]    = 0;
+        vertices[topIndex]     = baseRadius*Math.sin(theta);
+        normals[topIndex++]    = 0;
+        vertices[topIndex]     = top;
+        normals[topIndex]      = 1;
+
+      }
+
+      // Copy top cap to the bottom cap.
+      for (i=1; i<=nslices+1; i++)
+      {
+        topIndex               = 3*i;
+        bottomIndex            = i + 3*nslices+4;
+        indices[bottomIndex]   = bottomIndex;
+        bottomIndex           *= 3;
+        vertices[bottomIndex]  = vertices[topIndex++]
+        normals[bottomIndex++] = 0;
+        vertices[bottomIndex]  = vertices[topIndex]
+        normals[bottomIndex++] = 0;
+        vertices[bottomIndex]  = bottom;
+        normals[bottomIndex]   = -1;
+      }
+
+      // Build the side from the top and bottom cap vertices
+      topIndex    = 3;
+      bottomIndex = 9*nslices+15;
+      sideIndex   = 3*nslices+6;
+      for (i=0; i<=nslices; i++)
+      {
+        // Copy a point from the top cap
+        indices[sideIndex/3] = sideIndex/3;
+        vertices[sideIndex]  = vertices[topIndex];
+        normals[sideIndex++] = vertices[topIndex++]/baseRadius;
+        vertices[sideIndex]  = vertices[topIndex];
+        normals[sideIndex++] = vertices[topIndex++]/baseRadius;
+        vertices[sideIndex]  = vertices[topIndex];
+        normals[sideIndex++] = vertices[topIndex++]/baseRadius;
+        // And the next one from the bottom cap
+        indices[sideIndex/3] = sideIndex/3;
+        vertices[sideIndex]  = vertices[bottomIndex];
+        normals[sideIndex++] = vertices[bottomIndex++]/baseRadius;
+        vertices[sideIndex]  = vertices[bottomIndex];
+        normals[sideIndex++] = vertices[bottomIndex++]/baseRadius;
+        vertices[sideIndex]  = vertices[bottomIndex];
+        normals[sideIndex++] = vertices[bottomIndex++]/baseRadius;
+      }
+      surfaceGeometry.setNvertices(3*(4*nslices+6));
+      surfaceGeometry.setNindices(4*nslices+6);
+    }
+
+    /**
+     * Retrieve vertex buffers from the registry if the already exist,
+     * otherwise build and register them.
+     */
+    this.getVertexBuffers    = function(gl, vertexRegistry)
+    {
+      var geometry;
+      var vertices;
+
+      if (vertexRegistry.hasVertices(shape.value))
+      {
+        vertices = vertexRegistry.retrieveVertices(shape.value);
+      }
+      else
+      {
+        // TODO look for more effecient ways to allocate the storage
+        // possibly generating each array then the vbo individually.
+        geometry  = new surfaceGeometry(4*nslices+6, 4*nslices+6);
+        vertices = {};
+        this.computeGeometry(geometry);
+        vertices.vertices  = createBuffer(gl, geometry.getVertices());
+        vertices.normals   = createBuffer(gl, geometry.getNormals());
+        vertices.indices   = createIndexBuffer(gl, geometry.getIndices());
+        vertexRegistry.registerVertices(shape.value, vertices);
       }
       return vertices;
     }
@@ -338,21 +506,21 @@ function surfaceGeometry(nvertices_, nindices_)
       var geometry;
       var vertices;
 
-      if (vertexRegistry.hasVertices(shape))
+      if (vertexRegistry.hasVertices(shape.value))
       {
-        vertices = vertexRegistry.retrieveVertices(shape);
+        vertices = vertexRegistry.retrieveVertices(shape.value);
       }
       else
       {
         // TODO look for more effecient ways to allocate the storage
         // possibly generating each array then the vbo individually.
-        geometry  = new surfaceGeometry(3*(nlongitude+1)*(nlatitude+1), 6*nlongitude*nlatitude);
+        geometry  = new surfaceGeometry((nlongitude+1)*(nlatitude+1), 6*nlongitude*nlatitude);
         vertices = {};
         this.computeGeometry(geometry, intrinsicRadius, nlongitude, nlatitude);
         vertices.vertices = createBuffer(gl, geometry.getVertices());
         vertices.normals   = createBuffer(gl, geometry.getNormals());
         vertices.indices   = createIndexBuffer(gl, geometry.getIndices());
-        vertexRegistry.registerVertices(shape, vertices);
+        vertexRegistry.registerVertices(shape.value, vertices);
       }
       return vertices;
     }
