@@ -232,7 +232,7 @@ function surfaceGeometry(nvertices_, nindices_)
     var shape;
     var top;
 
-    baseRadius  = .5;
+    baseRadius  = 1.0
     height      = 1;
     bottom      = -height/2;
     nslices     = 30;
@@ -358,7 +358,7 @@ function surfaceGeometry(nvertices_, nindices_)
     }
 
     /**
-     * Retrieve vertex buffers from the registry if the already exist,
+     * Retrieve vertex buffers from the registry if they already exist,
      * otherwise build and register them.
      */
     this.getVertexBuffers    = function(gl, vertexRegistry)

@@ -99,7 +99,7 @@ function chargedPlane(sigma_, rho_,
   }
 
   /**
-   * Apply the MVC matrix to each start point for a field line
+   * Apply the MV matrix to each start point for a field line
    * to map them onto the actual rectangle.
    */
   this.adjustStartPoints  = function(startPoints)

@@ -218,7 +218,7 @@ function chargedSphere(Q_, rho_, x_, y_, z_, a_, b_)
 
     // This is the actual sized used in the default spherical geometry.
     intrinsicRadius = this.getIntrinsicRadius();
-    vertices       = this.getVertexBuffers(gl, vertexRegistry);
+    vertices        = this.getVertexBuffers(gl, vertexRegistry);
 
     // RGBA positive (blue) or negative (red) charge
     if (Q > 0)
