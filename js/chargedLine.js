@@ -21,7 +21,7 @@ function chargedLine(x0_, y0_, z0_, x1_, y1_, z1_, lambda_, rho_)
   var lambda;
   /** Transforms the base cylinder to the r=r1 cylinder. */
   var modelViewMatrix;
-  /** Rotation angles around the z and y axes */
+  /** Rotation angles around the y and z axes */
   var phi, theta;
   /** The density of field line per unit charge. */
   var rho;
@@ -319,7 +319,7 @@ function chargedLine(x0_, y0_, z0_, x1_, y1_, z1_, lambda_, rho_)
 
   this.render                 = function(gl, surfaceProgram)
   {
-    this.fullRender(gl, surfaceProgram, modelViewMatrix, tx, ty, tz, height, r0, r1, phi, theta, lambda);
+    this.fullRender(gl, surfaceProgram, modelViewMatrix, r0, r1, false);
   }
 
   lambda = lambda_;

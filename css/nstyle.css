@@ -140,7 +140,7 @@ div.topNav li a:hover
   position:           absolute;
   top:                0;
   z-index:            2;
-  -webkit-mask-image: -webkit-radial-gradient(10% 30%, 7em 10px, rgba(0,0,0,0.3), rgba(0,0,0,1));
+/*  -webkit-mask-image: -webkit-radial-gradient(10% 30%, 7em 10px, rgba(0,0,0,0.3), rgba(0,0,0,1)); */
 }
 
 .logo2:after
@@ -400,6 +400,26 @@ div.figure img, div.figure embed, div.floatLeft img, div.floatLeft embed
   margin-right: auto;
   border-style: ridge;
   padding:      3px;
+}
+
+iframe[seamless]
+{
+  background-color: transparent;
+  border:           0px none transparent;
+}
+
+details
+{
+  color:        #000066;
+  padding-left: 2em;
+}
+
+summary.faqElement
+{
+   font-family: Tahoma, Arial, sans-serif;
+   font-weight: normal;
+   color:       #0050B2;
+   background:  transparent;
 }
 
 p.error

@@ -342,7 +342,7 @@ function chargedCylinder(x0_, y0_, z0_, x1_, y1_, z1_, r0_, r1_, rhoq_, rhof_)
 
   this.render                 = function(gl, surfaceProgram)
   {
-      this.fullRender(gl, surfaceProgram, modelViewMatrix, tx, ty, tz, height, r0, r1, phi, theta, rhoq);
+      this.fullRender(gl, surfaceProgram, modelViewMatrix, r0, r1, false);
   }
 
   // Stock radius for a charged line.
@@ -368,7 +368,7 @@ function chargedCylinder(x0_, y0_, z0_, x1_, y1_, z1_, r0_, r1_, rhoq_, rhof_)
   else
   {
     // Neutral surfaces are grey
-    color = new Color(0.5, 0.5, 0.5, 0.30);
+    color = new Color(0.5, 0.5, 0.5, 0.20);
   }
 
   this.setColor(color);

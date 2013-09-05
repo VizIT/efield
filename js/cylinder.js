@@ -84,6 +84,11 @@ function cylinder()
     modelViewMatrix[14] = tz;
     modelViewMatrix[15] = 1.0;
 
+    console.log(modelViewMatrix[0], modelViewMatrix[4], modelViewMatrix[8],  modelViewMatrix[12]);
+    console.log(modelViewMatrix[1], modelViewMatrix[5], modelViewMatrix[9],  modelViewMatrix[13]);
+    console.log(modelViewMatrix[2], modelViewMatrix[6], modelViewMatrix[10], modelViewMatrix[14]);
+    console.log(modelViewMatrix[3], modelViewMatrix[7], modelViewMatrix[11], modelViewMatrix[15]);
+
     return modelViewMatrix;
   }
 
@@ -106,21 +111,27 @@ function cylinder()
 
   }
 
-  this.drawCylinder          = function(gl, surfaceProgram, modelView, nsegments)
+  this.drawCylinder          = function(gl, surfaceProgram, modelView, nsegments, drawCaps)
   {
     loadUniformMatrix4fv(gl, surfaceProgram, "modelViewMatrix", modelView);
 
-    // This draws the top cap
-    //this.drawCap(gl, nsegments+2, 0);
+    if (drawCaps)
+    {
+      // This draws the top cap
+      this.drawCap(gl, nsegments+2, 0);
+    }
 
     // This draws the side, connecting the caps
     this.drawSide(gl, 2*nsegments+2, nsegments+2);
 
-    // This draws the bottom cap
-    //this.drawCap(gl, nsegments+2, 3*nsegments+4);
+    if (drawCaps)
+    {
+      // This draws the bottom cap
+      this.drawCap(gl, nsegments+2, 3*nsegments+4);
+    }
   }
 
-  this.fullRender                = function(gl, surfaceProgram, modelView, tx, ty, tz, height, r0, r1, phi, theta, Q)
+  this.fullRender                = function(gl, surfaceProgram, modelView, r0, r1, drawCaps)
   {
     var i;
     var nindices;
@@ -168,7 +179,7 @@ function cylinder()
       //modelViewWorking[9]  = modelView[9] * scale;
       //modelViewWorking[10] = modelView[10] * scale;
 
-      this.drawCylinder(gl, surfaceProgram, modelViewWorking, nsegments);
+      this.drawCylinder(gl, surfaceProgram, modelViewWorking, nsegments, drawCaps);
     }
 
     gl.cullFace(gl.BACK);
@@ -187,7 +198,7 @@ function cylinder()
       //modelViewWorking[9]  = modelView[9] * scale;
       //modelViewWorking[10] = modelView[10] * scale;
 
-      this.drawCylinder(gl, surfaceProgram, modelViewWorking, nsegments);
+      this.drawCylinder(gl, surfaceProgram, modelViewWorking, nsegments, drawCaps);
     }
   }
 
@@ -221,6 +232,11 @@ function cylinder()
             .setZ1(z1);
   }
 
+  this.sign             = function(x)
+  {
+    return x < 0 ? -1 : 1;
+  }
+
   /**
    * Find phi, the rotation about the z-axis.
    */
@@ -229,39 +245,23 @@ function cylinder()
     var deltax;
     var deltay;
     var phi;
+    var sgn;
 
     deltay = y1 - y0;
-    if (deltay != 0)
-    {
-      deltax = x1 - x0;
-      if (deltax != 0)
-      {
-        phi    = Math.atan(deltay/deltax)
-      }
-      else
-      {
-        phi = Math.PI/2;
-      }
-    }
-    else
-    {
-      phi = 0;
-    }
-    x0 = Math.sqrt(x0*x0 + y0*y0);
-    y0 = 0;
-    x1 = -x0;
-    y1 = 0;
+    deltax = x1 - x0;
+    phi    = Math.atan2(deltay,deltax);
+
+    sgn = this.sign(x1);
+    x0  = -sgn*Math.sqrt(x0*x0 + y0*y0);
+    y0  = 0;
+    x1  = -x0;
+    y1  = 0;
 
     cylinder.setX0(x0)
             .setY0(y0)
             .setX1(x1)
             .setY1(y1)
             .setPhi(phi);
-  }
-
-  this.sign             = function(x)
-  {
-    return x < 0 ? -1 : 1;
   }
 
   /**

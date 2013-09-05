@@ -276,7 +276,7 @@
    * about the X axis by phi and about the Y axis by theta. This should be
    * especially fast if M is a Float32Array.
    */
-  function rotateBy(M, phi, theta)
+  function rotateXY(M, phi, theta)
   {
       // Hold current matrix values while we manipulate them.
       var h1, h2, h3;
@@ -320,6 +320,57 @@
       M[13] =  h1*spst + h2*cp - h3*ctsp;
       M[14] = -h1*cpst + h2*sp + h3*cpct;
       // M[15] = M[15];
+
+      return M;
+  }
+
+  /**
+   * Rotate M about the z axis by phi.
+   *
+   * @param {Float32Array(16)|Array(16)} M The colum major matrix to be rotated about the z axis.
+   * @param {Double}                     phi the angle by which M is rotated.
+   */
+  function rotateZ(M, phi)
+  {
+    var h0, h1;
+    var cp, sp;
+
+    cp    = Math.cos(phi);
+    sp    = Math.sin(phi);
+
+    // Column 1
+    h0    = M[0];
+    h1    = M[1];
+    M[0]  = h0*cp - h1*sp;
+    M[1]  = h0*sp + h1*cp;
+    // M[2]  = M[2]
+    // M[3]  = M[3]
+
+    // Column 2
+    h0    = M[4];
+    h1    = M[5];
+    M[4]  = h0*cp - h1*sp;
+    M[5]  = h0*sp + h1*cp;
+    // M[6]  = M[6]
+    // M[7]  = M[7]
+
+    // Column 3
+    h0    = M[8];
+    h1    = M[9];
+    M[8]  = h0*cp - h1*sp;
+    M[9]  = h0*sp + h1*cp;
+    // M[10] = M[10]
+    // M[11] = M[11]
+
+    // Column 4
+    h0    = M[12];
+    h1    = M[13];
+    M[12] = h0*cp - h1*sp;
+    M[13] = h0*sp + h1*cp;
+    // M[14] = M[14]
+    // M[15] = M[15]
+
+    return M;
   }
 
   /*

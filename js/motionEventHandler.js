@@ -119,7 +119,7 @@ function motionEventHandler(target_)
       modelViewMatrix = target.getModelViewMatrix();
       // Rotate the model view by phi radians about the X axis
       // an theta radians about the Y axis.
-      rotateBy(modelViewMatrix, deltaY/150, deltaX/150);
+      rotateXY(modelViewMatrix, deltaY/150, deltaX/150);
       target.setModelViewMatrix(modelViewMatrix);
       target.render();
 
@@ -153,6 +153,8 @@ function motionEventHandler(target_)
     var deltaY;
     var i;
     var identifier;
+    var modelViewMatrix;
+    var phi;
     var r0;
     var r1;
     var touch;
@@ -165,6 +167,7 @@ function motionEventHandler(target_)
     deltaX  = touch1.pageX - touch0.pageX;
     deltaY  = touch1.pageY - touch0.pageY;
     r0      = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
+    phi     = Math.atan2(deltaY, deltaX);
 
     touches = event.changedTouches;
      
@@ -188,7 +191,13 @@ function motionEventHandler(target_)
     deltaX     = touch1.pageX - touch0.pageX;
     deltaY     = touch1.pageY - touch0.pageY;
     r1         = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
+    // Should this be clockwise or counterclockwise?
+    phi        = phi - Math.atan2(deltaY, deltaX);
 
+    modelViewMatrix = target.getModelViewMatrix();
+    rotateZ(modelViewMatrix, phi);
+    target.setModelViewMatrix(modelViewMatrix);
+    
     deltaScale = r1-r0;
 
     target.zoomBy(-deltaScale/4);
@@ -247,7 +256,7 @@ function motionEventHandler(target_)
     modelViewMatrix = target.getModelViewMatrix();
     // Rotate the model view by phi radians about the X axis
     // an theta radians about the Y axis.
-    rotateBy(modelViewMatrix, deltaY/30, deltaX/30);
+    rotateXY(modelViewMatrix, deltaY/30, deltaX/30);
     target.setModelViewMatrix(modelViewMatrix);
     target.render();
 

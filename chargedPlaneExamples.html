@@ -3,6 +3,7 @@
   <head>
     <title>Visualizing an Electric Field With HTML5 and WebGL, Part 7: Charged Plane Examples</title>
     <link   rel="stylesheet"          href="css/nstyle.css" type="text/css">
+    <link   href='http://fonts.googleapis.com/css?family=IM+Fell+French+Canon:400italic' rel='stylesheet' type='text/css'>
     <meta   http-equiv="Content-Type" content="text/html;charset=utf-8" >
     <meta   name="viewport"           content="width=device-width, initial-scale=1.0">
     <link   rel="prev"                href="moreExamples.html">
@@ -609,16 +610,6 @@
                                           -49.49747468305832667272915846, -135.7106781186547524513414694,   -5.710678118654752478791493056);
 
 
-    renderer           = renderer.addChargeDistribution(chargeDistribution);
-    renderer.start();
-
-
-    drawingSurface     = document.getElementById('drawingSurfaceII');
-    renderer           = new fieldRenderer(drawingSurface);
-    renderer           = placeStartPoints(renderer);
-    gaussianSurface    = new gaussianSphere(0.0, 0.0, 0.0, 60.0);
-    renderer           = renderer.addGaussianSurface(gaussianSurface);
-    chargeDistribution = new chargedSphere( -1, 0.0, 0.0, 0.0, 0.0, 20.0, 50.0);
     renderer           = renderer.addChargeDistribution(chargeDistribution);
     renderer.start();
   </script>
