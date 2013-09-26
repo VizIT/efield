@@ -128,25 +128,6 @@ div.topNav li a:hover
   padding:       0px 10px;
   line-height:   40px;
   position:      relative;
-}
-
-.logo2 a:link,
-.logo2 a:visited,
-.logo2 a:hover,
-.logo2 a:active
-{
-  text-decoration:    none;
-  color:              rgb(14, 43, 224);
-  position:           absolute;
-  top:                0;
-  z-index:            2;
-/*  -webkit-mask-image: -webkit-radial-gradient(10% 30%, 7em 10px, rgba(0,0,0,0.3), rgba(0,0,0,1)); */
-}
-
-.logo2:after
-{
-  content:     "Vizit Solutions";
-  color:       #FFF;
   text-shadow: 0 1px 0 #ccc,
                  0 2px 0 #c9c9c9,
                  0 3px 0 #bbb,
@@ -159,6 +140,16 @@ div.topNav li a:hover
                  0 5px 10px rgba(0,0,0,.25),
                  0 8px 10px rgba(0,0,0,.2),
                  0 16px 20px rgba(0,0,0,.15);
+}
+
+.logo2 a:link,
+.logo2 a:visited,
+.logo2 a:hover,
+.logo2 a:active
+{
+  text-decoration:    none;
+  color:              rgb(14, 43, 224);
+  z-index:            2;
 }
 
 .Fell
