@@ -76,7 +76,6 @@ div#header ul
   font-family:    Helvetica, sans-serif;
   font-size:      13px;
   line-height:    20px;
-  position:       relative;
   margin:         0;
   padding:        0 3% 0 0;
 }
@@ -84,7 +83,6 @@ div#header ul
 div#header li
 {
   float:          left;
-  position:       relative;
   height:         45px;
   display:        inline;
   text-align:     left;
@@ -98,13 +96,9 @@ div#header li
 
 div#header li a
 {
-  display:         block;
-  float:           left;
   padding:         3px 30px 30px 30px;
-  z-index:         0;
   text-decoration: none;
   color:           #336699;
-  width:           100%;
   height:          22px;
   margin:          0;
 }
@@ -119,27 +113,27 @@ div.topNav li a:hover
   margin:           0;
 */
   height:           32px;
-  border:           1px solid #ccc;
+  border:           1px solid #c00;
 }
 
 .logo2
 {
-  font-size:     36px;
-  padding:       0px 10px;
-  line-height:   40px;
-  position:      relative;
-  text-shadow: 0 1px 0 #ccc,
-                 0 2px 0 #c9c9c9,
-                 0 3px 0 #bbb,
-                 0 4px 0 #b9b9b9,
-                 0 5px 0 #aaa,
-                 0 6px 1px rgba(0,0,0,.1),
-                 0 0 5px rgba(0,0,0,.1),
-                 0 1px 3px rgba(0,0,0,.3),
-                 0 3px 5px rgba(0,0,0,.2),
-                 0 5px 10px rgba(0,0,0,.25),
-                 0 8px 10px rgba(0,0,0,.2),
-                 0 16px 20px rgba(0,0,0,.15);
+  font-size:   36px;
+  padding:     0px 10px;
+  line-height: 40px;
+  float:       left;
+  text-shadow: 0 1px   0   #ccc,
+               0 2px   0   #c9c9c9,
+               0 3px   0   #bbb,
+               0 4px   0   #b9b9b9,
+               0 5px   0   #aaa,
+               0 6px   1px rgba(0,0,0,.1),
+               0 0     5px rgba(0,0,0,.1),
+               0 1px   3px rgba(0,0,0,.3),
+               0 3px   5px rgba(0,0,0,.2),
+               0 5px  10px rgba(0,0,0,.25),
+               0 8px  10px rgba(0,0,0,.2),
+               0 16px 20px rgba(0,0,0,.15);
 }
 
 .logo2 a:link,
@@ -149,7 +143,6 @@ div.topNav li a:hover
 {
   text-decoration:    none;
   color:              rgb(14, 43, 224);
-  z-index:            2;
 }
 
 .Fell
