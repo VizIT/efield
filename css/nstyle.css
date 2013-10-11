@@ -60,12 +60,14 @@ h4.center
 
 div#header
 {
-  height:         45px;
-  overflow:       hidden;
-  width:          100%;
-  border-bottom:  3px solid #333;
-  padding-top:    0%;
-  margin-top:     0%;
+  height:             48px;
+  overflow:           hidden;
+  width:              100%;
+  border-bottom:      1px solid #cccccc;
+  padding-top:        2px;
+  padding-left:       5%;
+  padding-right:      5%;
+  margin-top:         0;
 }
 
 div#header ul
@@ -74,33 +76,41 @@ div#header ul
   display:        block;
   list-style:     none;
   font-family:    Helvetica, sans-serif;
-  font-size:      13px;
+  font-size:      1.5vw;
   line-height:    20px;
   margin:         0;
-  padding:        0 3% 0 0;
+  padding:        0;
 }
 
 div#header li
 {
   float:          left;
-  height:         45px;
+  height:         48px;
   display:        inline;
   text-align:     left;
   margin-left:    1px;
-  font-size:      15px;
+  font-size:      1.5vw;
   line-height:    20px;
   color:          grey;
   padding:        0;
-  border-bottom:  3px solid #333;
+  border-bottom:  1px solid #cccccc;
 }
 
 div#header li a
 {
-  padding:         3px 30px 30px 30px;
+  padding:         3px 0vw 30px 4vw;
   text-decoration: none;
   color:           #336699;
   height:          22px;
   margin:          0;
+}
+html,
+html *,
+div#header
+{
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing:    border-box;
+  box-sizing:         border-box;
 }
 
 div.topNav li a:hover
@@ -118,22 +128,22 @@ div.topNav li a:hover
 
 .logo2
 {
-  font-size:   36px;
-  padding:     0px 10px;
-  line-height: 40px;
-  float:       left;
-  text-shadow: 0 1px   0   #ccc,
-               0 2px   0   #c9c9c9,
-               0 3px   0   #bbb,
-               0 4px   0   #b9b9b9,
-               0 5px   0   #aaa,
-               0 6px   1px rgba(0,0,0,.1),
-               0 0     5px rgba(0,0,0,.1),
-               0 1px   3px rgba(0,0,0,.3),
-               0 3px   5px rgba(0,0,0,.2),
-               0 5px  10px rgba(0,0,0,.25),
-               0 8px  10px rgba(0,0,0,.2),
-               0 16px 20px rgba(0,0,0,.15);
+  font-size:     3.0vw;
+  padding-right: 10px;
+  line-height:   40px;
+  float:         left;
+  text-shadow:   0 1px   0   #ccc,
+                 0 2px   0   #c9c9c9,
+                 0 3px   0   #bbb,
+                 0 4px   0   #b9b9b9,
+                 0 5px   0   #aaa,
+                 0 6px   1px rgba(0,0,0,.1),
+                 0 0     5px rgba(0,0,0,.1),
+                 0 1px   3px rgba(0,0,0,.3),
+                 0 3px   5px rgba(0,0,0,.2),
+                 0 5px  10px rgba(0,0,0,.25),
+                 0 8px  10px rgba(0,0,0,.2),
+                 0 16px 20px rgba(0,0,0,.15);
 }
 
 .logo2 a:link,
@@ -145,6 +155,19 @@ div.topNav li a:hover
   color:              rgb(14, 43, 224);
 }
 
+@media (min-width: 850px)
+{
+  .logo2
+  {
+    font-size:   36px;
+  }
+
+  div#header li
+  {
+    font-size:   15px;
+  }
+}
+
 .Fell
 {
   font-family: 'IM Fell French Canon', serif;
@@ -152,7 +175,7 @@ div.topNav li a:hover
   font-weight: 400;
 }
 
-div.wrapper
+/*div.wrapper
 {
   padding:               10px;
   margin:                16px auto;
@@ -165,11 +188,12 @@ div.wrapper
   box-shadow:            0 0 16px rgba(0, 0, 0, 0.5);
   background:            grey;
 }
+*/
 
 div#main
 {
   position:              relative;
-  padding:               10px 0 0;
+  /*padding:               10px 0 0;*/
   -webkit-border-radius: 4px;
   -moz-border-radius:    4px;
   border-radius:         4px;
@@ -181,13 +205,21 @@ div#main
 
 div.content
 {
-  margin-top:        0;
-  padding-top:       0;
-  padding-left:      5%;
-  padding-right:     5%;
-  min-height:        7in;
-  overflow:          auto;
-  font-family:       Tahoma, Arial, sans-serif;
+  margin-top:         0;
+  padding-top:        0;
+  padding-left:       5%;
+  padding-right:      5%;
+  min-height:         7in;
+  overflow:           auto;
+  font-family:        Tahoma, Arial, sans-serif;
+}
+
+div.content,
+div.content *
+{
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing:    border-box;
+  box-sizing:         border-box;
 }
 
 
