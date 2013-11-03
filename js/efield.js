@@ -1,7 +1,5 @@
-"use strict";
-
-/*
- * Copyright 2013 VizIT Solutions
+/**
+ * Copyright 2013 Vizit Solutions
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -33,8 +31,6 @@ function fieldRenderer(drawingSurface_, home_)
   var arrowBuffers;
   // Vertex array buffer for charges and positions.
   var chargeBuffer;
-  // A list of charge distributions.
-  var chargeDistributions;
   // This program draws the representation of the not quite point charges.
   var chargeImageProgram;
   // A generic container capable of containing an arbitrary number of charges.
@@ -58,6 +54,7 @@ function fieldRenderer(drawingSurface_, home_)
   var initialized;
   // Wait for the setup to finish before rendering the first frame.
   var latch;
+  var maxPoints;
   // Model-View matrix for use in all programs.
   var modelViewMatrix;
   var normalMatrix;
@@ -81,7 +78,6 @@ function fieldRenderer(drawingSurface_, home_)
   var surfaceProgram;
   var vertexRegistry;
 
-  chargeDistributions    = new Array();
   charges                = new Charges();
   drawingSurface         = drawingSurface_;
   explicitStartPoints    = new Array();
@@ -105,7 +101,7 @@ function fieldRenderer(drawingSurface_, home_)
   this.addChargeDistribution = function(distribution)
   {
     distribution.setVertexRegistry(vertexRegistry);
-    chargeDistributions.push(distribution);
+    charges.addDistribution(distribution);
     return this;
   }
 
@@ -124,6 +120,11 @@ function fieldRenderer(drawingSurface_, home_)
   this.getContext            = function()
   {
     return gl;
+  }
+
+  this.getCharges            = function()
+  {
+    return charges;
   }
 
   this.createSurfaceProgram  = function(gl)
@@ -294,9 +295,9 @@ function fieldRenderer(drawingSurface_, home_)
     var stride;
     var theCharges;
      
-    ncharges     = charges.getCount();
-    chargesArray = new Float32Array(4*ncharges);
     theCharges   = charges.getCharges();
+    ncharges     = theCharges.length;
+    chargesArray = new Float32Array(4*ncharges);
     stride       = 4;
 
     for(var i=0; i<ncharges; i++)
@@ -444,7 +445,7 @@ function fieldRenderer(drawingSurface_, home_)
     gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 
     this.drawCharges(gl,                    chargeImageProgram,    modelViewMatrix,
-                     projectionMatrix,      chargeBuffer,          charges.getCount(),
+                     projectionMatrix,      chargeBuffer,          charges.getNCharges(),
                      positiveChargeTexture, positiveChargeIndex,   negativeChargeTexture,
                      negativeChargeIndex);
 
@@ -452,15 +453,15 @@ function fieldRenderer(drawingSurface_, home_)
                        modelViewMatrix,     charges,              startPoints,
                        fluxLineBuffers,     fluxDirectionBuffers);
 
-    if (gaussianSurfaces.length > 0 || chargeDistributions.length > 0)
+    if (gaussianSurfaces.length > 0 || charges.getNDistributions() > 0)
     {
       gl.enable(gl.BLEND);
       gl.enable(gl.CULL_FACE);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-      if (chargeDistributions.length > 0)
+      if (charges.getNDistributions() > 0)
       {
         this.drawChargeDistributions(gl,              surfaceProgram, projectionMatrix,
-                                     modelViewMatrix, normalMatrix,   chargeDistributions);
+                                     modelViewMatrix, normalMatrix,   charges.getDistributions());
       }
 
       gl.disable(gl.DEPTH_TEST);
@@ -473,6 +474,9 @@ function fieldRenderer(drawingSurface_, home_)
       gl.disable(gl.BLEND);
       gl.disable(gl.CULL_FACE);
     }
+
+    //var data = drawingSurface.toDataURL("image/png").replace("image/png", "image/octet-stream");
+    //window.location.href = data;
   }
 
   this.zoomBy = function(delta)
@@ -536,15 +540,12 @@ this.capture    = function(canvas)
     var arrows;
     var chargeArray;
     var line;
-    var maxPoints;
     var newStartPoints;
     var ncharges;
     var nfluxLines;
     var points;
     var startPoint;
 
-    maxPoints            = 5000;
-    scale                = 150;
     // We project a scale x scale x scale cube into normalized device space.
     projectionMatrix     = generateOrthographicMatrix(scale, scale, -scale, scale);
             
@@ -560,11 +561,11 @@ this.capture    = function(canvas)
 
     startPoints          = explicitStartPoints;
 
-
-    ncharges = chargeDistributions.length;
+    chargeArray          = charges.getDistributions();
+    ncharges             = chargeArray.length;
     for(var i=0; i<ncharges; i++)
     {
-      newStartPoints = chargeDistributions[i].getStartPoints();
+      newStartPoints = chargeArray[i].getStartPoints();
       startPoints    = startPoints.concat(newStartPoints);
     }
 
@@ -585,7 +586,7 @@ this.capture    = function(canvas)
     points               = new Float32Array(3*maxPoints);
     nfluxLines           = startPoints.length;
                 
-    line                 = new fluxLine(charges, chargeDistributions);
+    line                 = new fluxLine(charges);
     line.setMaxPoints(5000);
     line.setDs(.3);
     line.setArrowSpacing(50);
@@ -607,7 +608,7 @@ this.capture    = function(canvas)
       startPoint[5]           = line.getNarrows();
     }
 
-    if (gaussianSurfaces.length > 0 || chargeDistributions.length > 0)
+    if (gaussianSurfaces.length > 0 || charges.getNDistributions() > 0)
     {
       surfaceProgram = this.createSurfaceProgram(gl);
     }
@@ -643,22 +644,24 @@ this.capture    = function(canvas)
 
   if (gl)
   {
-    negativeChargeIndex      = 0;
-    negativeChargeTexture    = loadTexture(gl, home + "images/negativeCharge.png", negativeChargeIndex, latch.countDown);
-    positiveChargeIndex      = 1;
-    positiveChargeTexture    = loadTexture(gl, home + "images/positiveCharge.png", positiveChargeIndex, latch.countDown);
+    negativeChargeIndex   = 0;
+    negativeChargeTexture = loadTexture(gl, home + "images/negativeCharge.png", negativeChargeIndex, latch.countDown);
+    positiveChargeIndex   = 1;
+    positiveChargeTexture = loadTexture(gl, home + "images/positiveCharge.png", positiveChargeIndex, latch.countDown);
             
     // Initially an identity matrix, modified by movementEventHandler.
-    modelViewMatrix = new Float32Array([1, 0, 0, 0,
-                                        0, 1, 0, 0,
-                                        0, 0, 1, 0,
-                                        0, 0, 0, 1]);
+    modelViewMatrix       = new Float32Array([1, 0, 0, 0,
+                                              0, 1, 0, 0,
+                                              0, 0, 1, 0,
+                                              0, 0, 0, 1]);
 
-    normalMatrix    = new Float32Array([1, 0, 0,
-                                        0, 1, 0,
-                                        0, 0, 1]);
+    normalMatrix          = new Float32Array([1, 0, 0,
+                                              0, 1, 0,
+                                              0, 0, 1]);
 
-    eventHandler             = new motionEventHandler(this);
+    maxPoints             = 5000;
+    scale                 = 150;
+    eventHandler          = new motionEventHandler(this);
     drawingSurface.addEventListener("mousewheel", eventHandler.handleMouseWheel.bind(eventHandler), false);
     drawingSurface.addEventListener("mousedown",  eventHandler.handleMouseDown.bind(eventHandler),  false);
     document.addEventListener("mouseup",          eventHandler.handleMouseUp.bind(eventHandler),    false);

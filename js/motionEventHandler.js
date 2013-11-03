@@ -254,9 +254,18 @@ function motionEventHandler(target_)
     var deltaY = newY - lastY;
 
     modelViewMatrix = target.getModelViewMatrix();
-    // Rotate the model view by phi radians about the X axis
-    // an theta radians about the Y axis.
-    rotateXY(modelViewMatrix, deltaY/30, deltaX/30);
+
+    if(event.shiftKey)
+    {
+      rotateZ(modelViewMatrix, (deltaY + deltaX)/30);
+    }
+    else
+    {
+      // Rotate the model view by phi radians about the X axis
+      // an theta radians about the Y axis.
+      rotateXY(modelViewMatrix, deltaY/30, deltaX/30);
+    }
+
     target.setModelViewMatrix(modelViewMatrix);
     target.render();
 

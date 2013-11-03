@@ -13,7 +13,6 @@
  *
  * @constructor
  */
-"use strict";
 function gaussianCylinder(x_, y_, z_, h_, r_, phi_, theta_)
 {
   var color;
@@ -102,7 +101,7 @@ function gaussianCylinder(x_, y_, z_, h_, r_, phi_, theta_)
 
   this.render                 = function(gl, surfaceProgram)
   {
-    this.fullRender(gl, surfaceProgram, modelViewMatrix, radius, radius, true);
+    this.fullRender(gl, surfaceProgram, modelViewMatrix, height, radius, radius, true);
   }
 
   // Gaussian (neutral) surfaces are grey
@@ -117,7 +116,7 @@ function gaussianCylinder(x_, y_, z_, h_, r_, phi_, theta_)
 
   this.setColor(color);
 
-  modelViewMatrix = this.getCylinderModelView(x0, y0, z0, height, radius, phi, theta);
+  modelViewMatrix = this.getCylinderModelView(x0, y0, z0, this.getBaseHeight(), this.getBaseRadius(), phi, theta);
 }
 
 /**

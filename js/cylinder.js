@@ -7,7 +7,6 @@
  *
  * @constructor
  */
-"use strict";
 function cylinder()
 {
   /** Working copy of the MV matrix, used to incorporate scale w/o altering the original. */
@@ -84,12 +83,54 @@ function cylinder()
     modelViewMatrix[14] = tz;
     modelViewMatrix[15] = 1.0;
 
-    console.log(modelViewMatrix[0], modelViewMatrix[4], modelViewMatrix[8],  modelViewMatrix[12]);
-    console.log(modelViewMatrix[1], modelViewMatrix[5], modelViewMatrix[9],  modelViewMatrix[13]);
-    console.log(modelViewMatrix[2], modelViewMatrix[6], modelViewMatrix[10], modelViewMatrix[14]);
-    console.log(modelViewMatrix[3], modelViewMatrix[7], modelViewMatrix[11], modelViewMatrix[15]);
-
     return modelViewMatrix;
+  }
+
+  /**
+   * Transform a set of points by the same ModelView matrix as used by the cylinder.
+   * Great for transforming automatically generated field start points.
+   */
+  this.transformPoints       = function(modelView, h, r, points)
+  {
+    var npoints;
+    var i;
+    var point;
+    var x;
+    var y;
+    var z;
+
+    // Most of the fields we just copy, those with r dependancies
+    // are multipleied by the scale factor.
+    modelViewWorking[0]  = modelView[0]  * r;
+    modelViewWorking[1]  = modelView[1]  * r;
+    modelViewWorking[2]  = modelView[2]  * r;
+    modelViewWorking[3]  = modelView[3];
+    modelViewWorking[4]  = modelView[4]  * r;
+    modelViewWorking[5]  = modelView[5]  * r;
+    modelViewWorking[6]  = modelView[6]  * r;
+    modelViewWorking[7]  = modelView[7];
+    modelViewWorking[8]  = modelView[8]  * h;
+    modelViewWorking[9]  = modelView[9]  * h;
+    modelViewWorking[10] = modelView[10] * h;
+    modelViewWorking[11] = modelView[11];
+    modelViewWorking[12] = modelView[12];
+    modelViewWorking[13] = modelView[13];
+    modelViewWorking[14] = modelView[14];
+    modelViewWorking[15] = modelView[15];
+
+    for (i=0, npoints=points.length; i<npoints; i++)
+    {
+      point    = points[i];
+      x        = point[0];
+      y        = point[1];
+      z        = point[2];
+
+      point[0] = modelViewWorking[0]*x + modelViewWorking[4]*y + modelViewWorking[8]*z  + modelViewWorking[12];
+      point[1] = modelViewWorking[1]*x + modelViewWorking[5]*y + modelViewWorking[9]*z  + modelViewWorking[13];
+      point[2] = modelViewWorking[2]*x + modelViewWorking[6]*y + modelViewWorking[10]*z + modelViewWorking[14];
+    }
+
+    return points;
   }
 
   this.setupBuffers          = function(gl,                  surfaceProgram,       surfaceGeometryBuffer,
@@ -131,15 +172,17 @@ function cylinder()
     }
   }
 
-  this.fullRender                = function(gl, surfaceProgram, modelView, r0, r1, drawCaps)
+  this.fullRender                = function(gl, surfaceProgram, modelView, h, r0, r1, drawCaps)
   {
     var i;
     var nindices;
     var nsegments;
     var r;
+    var rBase;
     var scale;
     var vertices;
 
+    rBase     = this.getBaseRadius();
     vertices  = this.getVertexBuffers(gl, vertexRegistry);
     loadUniform4f(gl, surfaceProgram, "surfaceColor",
                   color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
@@ -154,9 +197,9 @@ function cylinder()
     // These components are independant of scale, just copy once.
     modelViewWorking[3]  = modelView[3];
     modelViewWorking[7]  = modelView[7];
-    modelViewWorking[8]  = modelView[8];
-    modelViewWorking[9]  = modelView[9];
-    modelViewWorking[10] = modelView[10];
+    modelViewWorking[8]  = modelView[8]  * h;
+    modelViewWorking[9]  = modelView[9]  * h;
+    modelViewWorking[10] = modelView[10] * h;
     modelViewWorking[11] = modelView[11];
     modelViewWorking[12] = modelView[12];
     modelViewWorking[13] = modelView[13];
@@ -166,7 +209,7 @@ function cylinder()
     gl.cullFace(gl.FRONT);
     for (r=r1; r>=r0; r--)
     {
-      scale = r/r1;
+      scale = r/rBase;
       modelViewWorking[0]  = modelView[0] * scale;
       modelViewWorking[1]  = modelView[1] * scale;
       modelViewWorking[2]  = modelView[2] * scale;
@@ -174,10 +217,6 @@ function cylinder()
       modelViewWorking[4]  = modelView[4] * scale;
       modelViewWorking[5]  = modelView[5] * scale;
       modelViewWorking[6]  = modelView[6] * scale;
-
-      //modelViewWorking[8]  = modelView[8] * scale;
-      //modelViewWorking[9]  = modelView[9] * scale;
-      //modelViewWorking[10] = modelView[10] * scale;
 
       this.drawCylinder(gl, surfaceProgram, modelViewWorking, nsegments, drawCaps);
     }
@@ -185,7 +224,7 @@ function cylinder()
     gl.cullFace(gl.BACK);
     for (r=r0; r<=r1; r++)
     {
-      scale = r/r1;
+      scale = r/rBase;
       modelViewWorking[0]  = modelView[0] * scale;
       modelViewWorking[1]  = modelView[1] * scale;
       modelViewWorking[2]  = modelView[2] * scale;
@@ -193,10 +232,6 @@ function cylinder()
       modelViewWorking[4]  = modelView[4] * scale;
       modelViewWorking[5]  = modelView[5] * scale;
       modelViewWorking[6]  = modelView[6] * scale;
-
-      //modelViewWorking[8]  = modelView[8] * scale;
-      //modelViewWorking[9]  = modelView[9] * scale;
-      //modelViewWorking[10] = modelView[10] * scale;
 
       this.drawCylinder(gl, surfaceProgram, modelViewWorking, nsegments, drawCaps);
     }

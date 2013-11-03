@@ -1,4 +1,3 @@
-"use strict";
 /**
  * A charged plane with charge density sigma, field line density rho,
  * and bounding box {(x1, y1, z1), (x2, y2, z2), (x3, y3, z3), (x4, y4, z4)}.
@@ -480,8 +479,8 @@ function chargedPlane(sigma_, rho_,
       {
         boundingBox[3*point+1] /= sy;
       }
-      return boundingBox;
     }
+    return boundingBox;
   }
 
   this.getModelView       = function()

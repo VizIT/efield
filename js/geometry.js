@@ -1,4 +1,3 @@
-"use strict";
 /**
  * A holder for data used to draw a surface. Provide nverticies and nindices as the
  * size of vertex, normal, and index arrays.
@@ -225,19 +224,24 @@ function surfaceGeometry(nvertices_, nindices_)
    */
   GeometryEngine.cylinder          = function()
   {
+    var baseHeight;
     var baseRadius;
     var bottom;
-    var height;
     var nslices;
     var shape;
     var top;
 
-    baseRadius  = 1.0
-    height      = 1;
-    bottom      = -height/2;
+    baseHeight  = 1.0;
+    baseRadius  = 1.0;
+    bottom      = -baseHeight/2;
     nslices     = 30;
     shape       = GeometryEngine.Shapes.CYLINDER;
-    top         = height/2;
+    top         = baseHeight/2;
+
+    this.getBaseHeight = function()
+    {
+      return baseHeight;
+    }
 
     this.getBaseRadius = function()
     {

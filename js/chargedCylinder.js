@@ -15,7 +15,6 @@
  *
  * @constructor
  */
-"use strict";
 function chargedCylinder(x0_, y0_, z0_, x1_, y1_, z1_, r0_, r1_, rhoq_, rhof_)
 {
   var color;
@@ -194,35 +193,6 @@ function chargedCylinder(x0_, y0_, z0_, x1_, y1_, z1_, r0_, r1_, rhoq_, rhof_)
   }
 
   /**
-   * Apply the MV matrix to each start point for a field line
-   * to map them onto the actual rectangle.
-   */
-  this.adjustStartPoints  = function(startPoints)
-  {
-    var npoints;
-    var point;
-    var x;
-    var y;
-    var z;
-
-    npoints = startPoints.length;
-
-    for(var i=0; i<npoints; i++)
-    {
-      point = startPoints[i];
-      x        = point[0];
-      y        = point[1];
-      z        = point[2];
-
-      point[0] = modelViewMatrix[0]*x + modelViewMatrix[4]*y + modelViewMatrix[8]*z  + modelViewMatrix[12];
-      point[1] = modelViewMatrix[1]*x + modelViewMatrix[5]*y + modelViewMatrix[9]*z  + modelViewMatrix[13];
-      point[2] = modelViewMatrix[2]*x + modelViewMatrix[6]*y + modelViewMatrix[10]*z + modelViewMatrix[14];
-    }
-
-    return startPoints;
-  }
-
-  /**
    * Create a set of start points along the base line charge, then transform them
    * with the model view to get the tru location in the scene.
    */
@@ -268,7 +238,8 @@ function chargedCylinder(x0_, y0_, z0_, x1_, y1_, z1_, r0_, r1_, rhoq_, rhof_)
       }
     }
 
-    return this.adjustStartPoints(startPoints);
+    return this.transformPoints(modelViewMatrix,         height/this.getBaseHeight(),
+                                r1/this.getBaseRadius(), startPoints);
   }
 
   /**
@@ -342,7 +313,9 @@ function chargedCylinder(x0_, y0_, z0_, x1_, y1_, z1_, r0_, r1_, rhoq_, rhof_)
 
   this.render                 = function(gl, surfaceProgram)
   {
-      this.fullRender(gl, surfaceProgram, modelViewMatrix, r0, r1, false);
+      this.fullRender(gl,                          surfaceProgram,          modelViewMatrix,
+                      height/this.getBaseHeight(), r0/this.getBaseRadius(), r1/this.getBaseRadius(),
+                      false);
   }
 
   // Stock radius for a charged line.
@@ -386,7 +359,7 @@ function chargedCylinder(x0_, y0_, z0_, x1_, y1_, z1_, r0_, r1_, rhoq_, rhof_)
   y1     = y1_;
   z1     = z1_;
 
-  modelViewMatrix = this.getCylinderModelView(tx, ty, tz, height, r1, phi, theta);
+  modelViewMatrix = this.getCylinderModelView(tx, ty, tz, this.getBaseHeight(), this.getBaseRadius(), phi, theta);
   x10             = x1-x0;
   y10             = y1-y0;
   z10             = z1-z0;
