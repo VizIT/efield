@@ -75,15 +75,25 @@ function surfaceGeometry(nvertices_, nindices_)
   }
 
   /**
+   * An enum listing sides of an object.
+   */
+  GeometryEngine.Sides  = {
+                            TOP            : {value: "top"},
+                            BOTTOM         : {value: "bottom"},
+                            LEFT           : {value: "left"},
+                            RIGHT          : {value: "right"}
+                          };
+
+  /**
    * An enum cataloging the known shapes.
    * SPHERE
    * RECTANGLE, which may be folded into a cube eventually,
    * and CYLINDER.
    */
   GeometryEngine.Shapes = {
-                           SPHERE         : {value: "sphere"},
-                           SQUARE         : {value: "square"},
-                           CYLINDER       : {value: "cylinder"}
+                            SPHERE         : {value: "sphere"},
+                            SQUARE         : {value: "square"},
+                            CYLINDER       : {value: "cylinder"}
                           };
 
 

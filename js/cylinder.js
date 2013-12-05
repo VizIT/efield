@@ -172,6 +172,10 @@ function cylinder()
     }
   }
 
+  /**
+   * Render a full cylinder as an assemblage of parts, including rearward and forward facing halves,
+   * multiple radii, and optionally end caps.
+   */
   this.fullRender                = function(gl, surfaceProgram, modelView, h, r0, r1, drawCaps)
   {
     var i;

@@ -1,4 +1,3 @@
-"use strict";
 /**
  * Represents a single charge in a set of charges
  * A charge has position and a charge in nano-Columbs.
@@ -43,8 +42,10 @@ function Charge(Q_, x_, y_, z_)
       r2          = deltaX*deltaX + deltaY*deltaY + deltaZ*deltaZ;
       if (r2 <= 0)
       {
+        // We can't attach a direction to the field, we should never get here.
         return field;
       }
+
       r           = Math.sqrt(r2);
       f           = Q/r2;
       // Similar triangles allows easy distribution of the field into vector components.
@@ -130,65 +131,111 @@ function Charge(Q_, x_, y_, z_)
 }
 
 /**
- * A collection of point charges. TODO Is this still useful?
+ * A collection of point charges.
  */
 function Charges()
 {
-    // Add a charge to the configuration of charges represented by
-    // this object. Defined here so we can use it in the constructor.
-    this.addCharge = function(charge)
+  var charges        = new Array();
+  var distributions  = new Array();
+
+  // Add a charge to the set of charges. 
+  this.addCharge         = function(charge)
+  {
+    charges.push(charge);
+    return this;
+  }
+
+  this.getCharges        = function()
+  {
+    return charges;
+  }
+
+  this.getNCharges       = function()
+  {
+    return charges.length;
+  }
+
+  // Add a charge distribution to the set of charges.
+  this.addDistribution   = function(distribution)
+  {
+    distributions.push(distribution);
+    return this;
+  }
+
+  this.getDistributions  = function()
+  {
+    return distributions;
+  }
+
+  this.getNDistributions = function()
+  {
+    return distributions.length;
+  }
+
+  /*
+   * Comnpute the field at x, y, z resulting from a all
+   * charge configurations.
+   */
+  this.getField           = function(x, y, z)
+  {
+    // Field from the current charge
+    var currentField;
+    // The field vector
+    var field          = new Array(0, 0, 0);
+
+    field        = this.getFieldFromCharges(charges,       x, y, z);
+    currentField = this.getFieldFromCharges(distributions, x, y, z);
+
+    field[0]      += currentField[0];
+    field[1]      += currentField[1];
+    field[2]      += currentField[2];
+
+    return field;
+  }
+
+  /*
+   * Comnpute the field at x, y, z resulting from a charge
+   * configuration.
+   */
+  this.getFieldFromCharges = function(charges, x, y, z)
+  {
+    var charge;
+    // Field from the current charge
+    var currentField;
+    // The field vector
+    var field          = new Array(0, 0, 0);
+    
+
+    for(var i=0, n=charges.length; i<n; i++)
     {
-        n = charges.push(charge);
-        return n;
+      charge         = charges[i];
+
+      currentField   = charge.getField(x, y, z);
+      field[0]      += currentField[0];
+      field[1]      += currentField[1];
+      field[2]      += currentField[2];
     }
+    return field;
+  }
 
-    var n       = 0;
-    var charges = new Array();
-
-    // If any charges are passed into the constructor, add them immediatly
-    // to the set.
-    for (var i=0; i<arguments.length; i++)
+  /**
+   * Set the vertex registry, that holds the vertex arrays for each
+   * geometry. That is all cylinders use the same vertices, just
+   * different transformations.
+   *
+   * @param {GeometryEngine.VertexRegistry} vertexRegistry Registry for vertex buffers for each geometry type.
+   */
+  this.setVertexRegistry   = function(vertexRegistry)
+  {
+    for(var i=0, n=distributions.length; i<n; i++)
     {
-        n = this.addCharge(arguments[i]);
+      distributions[i].setVertexRegistry(vertexRegistry);
     }
-
-    this.getCount = function()
-    {
-        return n;
-    }
-
-    this.getCharges = function()
-    {
-        return charges;
-    }
-
-    /*
-     * Comnpute the field at x, y, z resulting from our charge
-     * configuration.
-     */
-    this.getField = function(x, y, z)
-    {
-      var charge;
-      // Field from the current charge
-      var currentField;
-      // The field vector
-      var field          = new Array(0, 0, 0);
-
-      for(var i=0; i<n; i++)
-      {
-        charge         = charges[i];
-
-        currentField   = charge.getField(x, y, z);
-        field[0]      += currentField[0];
-        field[1]      += currentField[1];
-        field[2]      += currentField[2];
-      }
-      return field;
-    }
+  }
 }
 
 
-function fluxLine(charges_, chargeDistributions_)
+function fluxLine(charges_)
 {
     // Lines that make up the arrow are drawn with this length.
     var arrowSize;
@@ -200,7 +247,7 @@ function fluxLine(charges_, chargeDistributions_)
     // Each point represents a distance ds along the field line.
     var ds;
     // The charge configuration we are drawing the field lines for.
-    var charges   = charges_
+    var charges;
     // The maximum number of points along the line to trace.
     var maxPoints = 0;
     // The number of points along the line actually computed.
@@ -216,7 +263,7 @@ function fluxLine(charges_, chargeDistributions_)
     var startY;
     var startZ;
 
-    distributions = chargeDistributions_;
+    charges   = charges_;
 
     this.getArrows    = function()
     {
@@ -418,26 +465,6 @@ function fluxLine(charges_, chargeDistributions_)
 
     }
 
-    /**
-     * Add the fields from charge distributions into an existing field array.
-     */
-    this.addDistributionFields = function(f, distributions, x, y, z)
-    {
-      var ndistributions;
-      var newfield;
-
-      ndistributions = distributions.length;
-
-      for(var i=0; i<ndistributions; i++)
-      {
-        newfield = distributions[i].getField(x, y, z)
-        f[0]    += newfield[0];
-        f[1]    += newfield[1];
-        f[2]    += newfield[2];
-      }
-      return f;
-    }
-
     /*
      * Trace a field line starting at the given x, y, z coordinates.
      * Each step of length ds has components (Ex/E*ds, Ey/E*ds, Ez/E*ds).
@@ -470,7 +497,6 @@ function fluxLine(charges_, chargeDistributions_)
             points[offset+1] = y;
             points[offset+2] = z;
             field            = charges.getField(x, y, z);
-            field            = this.addDistributionFields(field, distributions, x, y, z)
             f                = Math.sqrt(field[0] * field[0] + field[1] * field[1] + field[2] * field[2]);
 
             if (f == 0)

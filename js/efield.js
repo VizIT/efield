@@ -117,6 +117,16 @@ function fieldRenderer(drawingSurface_, home_)
     return this;
   }
 
+  /**
+   * This is used when the charges are used as a source in multiple
+   * representations and so are computed outside of this renderer.
+   */
+  this.setCharges            = function(charges_)
+  {
+    charges = charges_;
+    charges.setVertexRegistry(vertexRegistry);
+  }
+
   this.getContext            = function()
   {
     return gl;

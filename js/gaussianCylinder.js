@@ -27,7 +27,8 @@ function gaussianCylinder(x_, y_, z_, h_, r_, phi_, theta_)
 
   this.setX               = function(x_)
   {
-    x0 = x_;
+    x0                  = x_;
+    modelViewMatrix[12] = x0;
     return this;
   }
   this.getX               = function()
@@ -37,7 +38,8 @@ function gaussianCylinder(x_, y_, z_, h_, r_, phi_, theta_)
 
   this.setY               = function(y_)
   {
-    y0 = y_;
+    y0                  = y_;
+    modelViewMatrix[13] = y0;
     return this;
   }
 
@@ -48,12 +50,29 @@ function gaussianCylinder(x_, y_, z_, h_, r_, phi_, theta_)
 
   this.setZ               = function(z_)
   {
-    z0 = z_;
+    z0                  = z_;
+    modelViewMatrix[14] = z0;
     return this;
   }
+
   this.getZ               = function()
   {
     return z0;
+  }
+
+  /**
+   * Shorthand invocation to set each of x0, y0, z0 from array elements
+   */
+  this.setOrigin          = function(origin)
+  {
+      this.setX(origin[0]);
+      this.setY(origin[1]);
+      return this.setZ(origin[2]);
+  }
+
+  this.getOrigin          = function()
+  {
+    return [x0, y0, z0];
   }
 
   this.setRadius          = function(r_)
@@ -83,7 +102,7 @@ function gaussianCylinder(x_, y_, z_, h_, r_, phi_, theta_)
     return this;
   }
 
-  this.getheta            = function()
+  this.getTheta           = function()
   {
     return theta;
   }
