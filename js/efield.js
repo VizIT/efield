@@ -38,6 +38,8 @@ function fieldRenderer(drawingSurface_, home_)
   // A Float32Array with the charges and their position, good to feed to a
   // vertex array buffer for a sharde.
   var charges32Array;
+  // Handles events around gain and loss of gl context.
+  var contextHandler;
   var drawingSurface;
   var explicitStartPoints;
   // Vertex buffer for flux directional arrows
@@ -446,11 +448,12 @@ function fieldRenderer(drawingSurface_, home_)
 
   this.render = function()
   {
-    // If setup isn't finished, just return - we can't possibly render a frame.
-    if (!initialized)
+    // If setup isn't finished or gl context lost, just return - we can't possibly render a frame.
+    if (!initialized || gl.isContextLost())
     {
       return;
     }
+
     // Clear previous color and depth values - do this just before the first set of elements are drawn
     gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 
@@ -644,40 +647,65 @@ this.capture    = function(canvas)
     latch.countDown();
   }
 
+  this.initializeContext  = function(drawingSurface)
+  {
+    gl                       = getGLContext(drawingSurface);
 
-            
+    if (gl)
+    {
+      negativeChargeIndex   = 0;
+      negativeChargeTexture = loadTexture(gl, home + "images/negativeCharge.png", negativeChargeIndex, latch.countDown);
+      positiveChargeIndex   = 1;
+      positiveChargeTexture = loadTexture(gl, home + "images/positiveCharge.png", positiveChargeIndex, latch.countDown);
+    }
+
+    return gl;
+  }
+
+// DEBUG
+/*
+  drawingSurface = WebGLDebugUtils.makeLostContextSimulatingCanvas(drawingSurface);
+  drawingSurface.loseContextInNCalls(700);
+  drawingSurface.setRestoreTimeout(2000);  // recover in 2 seconds
+*/
+
+  contextHandler = new GLContextEventHandler(drawingSurface, this)
+  /**
+   * Per 5.15.2 The Context Lost Event of the <a href =
+   * "http://www.khronos.org/registry/webgl/specs/latest/1.0/">current spec</a>
+   * this enables the webglcontextrestored event to be delivered
+   */
+  drawingSurface.addEventListener("webglcontextlost", contextHandler.contextLost.bind(contextHandler),         false);
+
+  /**
+   * When context is restored rebuild gl and geometry objects.
+   */
+  drawingSurface.addEventListener("webglcontextrestored", contextHandler.contextRestored.bind(contextHandler), false);
+
   // Allows initialRenderer to be invoked in the context of this.
   // https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Function/bind
   latch = new countdownLatch(3, this.initialRender.bind(this));
 
-  gl                       = getGLContext(drawingSurface);
+  gl    = this.initializeContext(drawingSurface);
 
-  if (gl)
-  {
-    negativeChargeIndex   = 0;
-    negativeChargeTexture = loadTexture(gl, home + "images/negativeCharge.png", negativeChargeIndex, latch.countDown);
-    positiveChargeIndex   = 1;
-    positiveChargeTexture = loadTexture(gl, home + "images/positiveCharge.png", positiveChargeIndex, latch.countDown);
-            
-    // Initially an identity matrix, modified by movementEventHandler.
-    modelViewMatrix       = new Float32Array([1, 0, 0, 0,
-                                              0, 1, 0, 0,
-                                              0, 0, 1, 0,
-                                              0, 0, 0, 1]);
+  // Initially an identity matrix, modified by movementEventHandler.
+  modelViewMatrix       = new Float32Array([1, 0, 0, 0,
+                                            0, 1, 0, 0,
+                                            0, 0, 1, 0,
+                                            0, 0, 0, 1]);
 
-    normalMatrix          = new Float32Array([1, 0, 0,
+  normalMatrix          = new Float32Array([1, 0, 0,
                                               0, 1, 0,
                                               0, 0, 1]);
 
-    maxPoints             = 5000;
-    scale                 = 150;
-    eventHandler          = new motionEventHandler(this);
-    drawingSurface.addEventListener("mousewheel", eventHandler.handleMouseWheel.bind(eventHandler), false);
-    drawingSurface.addEventListener("mousedown",  eventHandler.handleMouseDown.bind(eventHandler),  false);
-    document.addEventListener("mouseup",          eventHandler.handleMouseUp.bind(eventHandler),    false);
-    document.addEventListener("mousemove",        eventHandler.handleMouseMove.bind(eventHandler),  false);
-    drawingSurface.addEventListener("touchstart", eventHandler.handleTouchStart.bind(eventHandler), false);
-    drawingSurface.addEventListener("touchmove",  eventHandler.handleTouchMove.bind(eventHandler),  false);
-    drawingSurface.addEventListener("touchend",   eventHandler.handleTouchEnd.bind(eventHandler),   false);
-  }
+  maxPoints             = 5000;
+  scale                 = 150;
+  eventHandler          = new motionEventHandler(this);
+  drawingSurface.addEventListener("mousewheel", eventHandler.handleMouseWheel.bind(eventHandler), false);
+  drawingSurface.addEventListener("mousedown",  eventHandler.handleMouseDown.bind(eventHandler),  false);
+  document.addEventListener("mouseup",          eventHandler.handleMouseUp.bind(eventHandler),    false);
+  document.addEventListener("mousemove",        eventHandler.handleMouseMove.bind(eventHandler),  false);
+  drawingSurface.addEventListener("touchstart", eventHandler.handleTouchStart.bind(eventHandler), false);
+  drawingSurface.addEventListener("touchmove",  eventHandler.handleTouchMove.bind(eventHandler),  false);
+  drawingSurface.addEventListener("touchend",   eventHandler.handleTouchEnd.bind(eventHandler),   false);
 }

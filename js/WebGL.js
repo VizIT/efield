@@ -46,7 +46,7 @@
       gl.compileShader(shader);
 
       var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-      if (!success)
+      if (!success && !gl.isContextLost())
       {
           throw "Shader compile failed with:" + gl.getShaderInfoLog(shader);
       }
@@ -131,7 +131,7 @@
   function loadTexture(gl, src, textureIndex, callback)
   {
       var texture  = gl.createTexture();
-      var image        = new Image();
+      var image    = new Image();
       image.onload = function()
                      {
                        onTextureLoaded(gl, image, texture, textureIndex, callback);
