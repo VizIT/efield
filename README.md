@@ -1,7 +1,8 @@
-[efield](http://vizit.github.io/efield/)
-========================================
-Pure HTML5 Electric Field Visualizations
-----------------------------------------
+[efield](http://www.vizitsolutions.com/portfolio/efield/) - Pure HTML5 Electric Field Visualizations
+====================================================================================================
+
+Note that the efield toolkit has been replaced by the more general and better organized
+[vfield](http://www.vizitsolutions.com/portfolio/vfield/)
 
 The efield toolkit allows authors and other content creators to quickly build 
 easy to understand visualizations of electric fields. Simply specify the position
